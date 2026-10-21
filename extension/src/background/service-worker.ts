@@ -4,13 +4,10 @@ import { normalizeProxySettings, validateProxyEndpoint } from "../core/proxy-con
 import type { ErrorCode, ProxySettings, PublicState } from "../core/types";
 import { AuthRuntime, registerAuthListener } from "./auth";
 import { mapProxyErrorText, mapRequestErrorText, RuntimeErrorSignal } from "./error-signal";
-import {
-  ProbeService,
-  resolveTestMarker,
-  type ProbeMarkerStore,
-  type ProbeOutcome,
-} from "./probe";
+import { ProbeService, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
 import { createChromeProxySettingsApi, ProxyController } from "./proxy-controller";
+import { RuntimeFailureGate } from "./runtime-failures";
+import { publishTestResult } from "./test-result";
 import { registerUiSurface } from "./ui-surface";
 import {
   forgetCredentials,
@@ -29,6 +26,7 @@ const EXTENSION_VERSION = chrome.runtime.getManifest().version;
 const settingsApi = createChromeProxySettingsApi();
 const controller = new ProxyController({ api: settingsApi });
 const runtimeSignal = new RuntimeErrorSignal();
+const probeGate = new RuntimeFailureGate();
 
 const markerStore: ProbeMarkerStore = {
   save: async (marker) => {
@@ -81,14 +79,16 @@ chrome.webRequest.onErrorOccurred.addListener(
       return;
     }
     runtimeSignal.set("proxy", code);
-    void enqueue(async () => {
-      const { store } = await loadStore();
-      if (!store.enabled) {
-        return;
-      }
-      await transitionPersistedState("FAIL", new TunnelError(code));
-      await updateBadge();
-    }).catch(() => undefined);
+    probeGate.report(() => {
+      void enqueue(async () => {
+        const { store } = await loadStore();
+        if (!store.enabled) {
+          return;
+        }
+        await transitionPersistedState("FAIL", new TunnelError(code));
+        await updateBadge();
+      }).catch(() => undefined);
+    });
   },
   { urls: ["<all_urls>"] },
 );
@@ -100,7 +100,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 let operationQueue: Promise<unknown> = Promise.resolve();
-let probeInProgress = false;
 
 function enqueue<T>(task: () => Promise<T>): Promise<T> {
   const run = operationQueue.then(task, task);
@@ -147,16 +146,15 @@ async function updateBadge(): Promise<void> {
 
 function reportRuntimeError(code: ErrorCode): void {
   runtimeSignal.set("auth", code);
-  if (probeInProgress) {
-    return;
-  }
-  void enqueue(async () => {
-    try {
-      await transitionPersistedState("FAIL", new TunnelError(code));
-      await updateBadge();
-    } catch {
-      void 0;
-    }
+  probeGate.report(() => {
+    void enqueue(async () => {
+      try {
+        await transitionPersistedState("FAIL", new TunnelError(code));
+        await updateBadge();
+      } catch {
+        void 0;
+      }
+    });
   });
 }
 
@@ -195,49 +193,36 @@ async function testConnection(): Promise<PublicState> {
 
   const tunnelActive = store.enabled && store.mode === "browser";
   authRuntime.setProbeActive(true);
-  probeInProgress = true;
+  probeGate.beginProbe();
   runtimeSignal.clear();
 
   try {
-    await transitionPersistedState("START_TEST");
-    await updateBadge();
-  } catch {
-    void 0;
-  }
+    try {
+      await transitionPersistedState("START_TEST");
+      await updateBadge();
+    } catch {
+      void 0;
+    }
 
-  let outcome: ProbeOutcome;
-  try {
-    outcome = await probeService.run(store.settings, { tunnelActive });
-  } catch (error) {
-    outcome = probeOutcomeFromError(error);
+    let outcome: ProbeOutcome;
+    try {
+      outcome = await probeService.run(store.settings, { tunnelActive });
+    } catch (error) {
+      outcome = probeOutcomeFromError(error);
+    }
+
+    await publishTestResult(outcome, {
+      updateStore,
+      transition: (event, error) => transitionPersistedState(event, error),
+      updateBadge,
+    });
+
+    return await currentPublicState();
   } finally {
-    probeInProgress = false;
+    probeGate.endProbe();
     authRuntime.setProbeActive(false);
     authRuntime.invalidate();
   }
-
-  await updateStore((current) => ({
-    ...current,
-    testInProgress: resolveTestMarker(current.testInProgress, outcome),
-    lastCheck: {
-      at: new Date().toISOString(),
-      ok: outcome.ok,
-      exitIp: outcome.exitIp,
-      errorCode: outcome.errorCode,
-      durationMs: outcome.durationMs,
-      directIp: outcome.directIp,
-      suspectedDirect: outcome.suspectedDirect,
-    },
-  }));
-
-  if (outcome.ok) {
-    await transitionPersistedState("TEST_DONE");
-  } else {
-    await transitionPersistedState("FAIL", new TunnelError(outcome.errorCode ?? "E_UNKNOWN"));
-  }
-
-  await updateBadge();
-  return currentPublicState();
 }
 
 function validateSettings(settings: ProxySettings): ProxySettings {
@@ -304,12 +289,20 @@ async function bootstrap(): Promise<void> {
   } catch {
     void 0;
   }
+  let recoveryFailed = false;
   try {
     await recoverStaleProbe();
   } catch {
-    void 0;
+    recoveryFailed = true;
   }
   await reconcile();
+  if (recoveryFailed) {
+    try {
+      await updateStore((current) => ({ ...current, testInProgress: null }));
+    } catch {
+      void 0;
+    }
+  }
   await updateBadge();
 }
 
