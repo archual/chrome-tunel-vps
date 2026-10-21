@@ -10,5 +10,673 @@
   "actionTitle": {
     "message": "VPS Tunnel",
     "description": "Подпись кнопки на панели инструментов"
+  },
+  "appName": {
+    "message": "VPS Tunnel",
+    "description": "Название продукта в интерфейсе"
+  },
+  "localeCode": {
+    "message": "ru",
+    "description": "Код языка интерфейса для Intl"
+  },
+  "settings": {
+    "message": "Настройки",
+    "description": "Кнопка настроек"
+  },
+  "close": {
+    "message": "Закрыть",
+    "description": "Закрыть диалог"
+  },
+  "cancel": {
+    "message": "Отмена",
+    "description": "Отмена действия"
+  },
+  "back": {
+    "message": "Назад",
+    "description": "Назад к предыдущему шагу"
+  },
+  "next": {
+    "message": "Далее",
+    "description": "Следующий шаг"
+  },
+  "retry": {
+    "message": "Повторить",
+    "description": "Повторить неудачное действие"
+  },
+  "copy": {
+    "message": "Скопировать",
+    "description": "Скопировать текст"
+  },
+  "copied": {
+    "message": "Скопировано",
+    "description": "Подтверждение копирования"
+  },
+  "soon": {
+    "message": "скоро",
+    "description": "Метка недоступной пока функции"
+  },
+  "diagnostics": {
+    "message": "Диагностика",
+    "description": "Ссылка на диагностику"
+  },
+  "checkConnection": {
+    "message": "Проверить соединение",
+    "description": "Проверка прокси"
+  },
+  "testing": {
+    "message": "Проверяем соединение…",
+    "description": "Идёт проверка"
+  },
+  "enableTunnel": {
+    "message": "Включить туннель",
+    "description": "Основная кнопка включения"
+  },
+  "disableTunnel": {
+    "message": "Выключить",
+    "description": "Кнопка выключения"
+  },
+  "openSettings": {
+    "message": "Открыть настройки",
+    "description": "Переход в настройки"
+  },
+  "save": {
+    "message": "Сохранить",
+    "description": "Сохранить настройки"
+  },
+  "saveAndContinue": {
+    "message": "Сохранить и продолжить",
+    "description": "Сохранить и перейти к проверке"
+  },
+  "forgetCreds": {
+    "message": "Забыть креды",
+    "description": "Удалить логин и пароль"
+  },
+  "confirmForget": {
+    "message": "Точно забыть?",
+    "description": "Подтверждение удаления кредов"
+  },
+  "done": {
+    "message": "Готово",
+    "description": "Завершение"
+  },
+  "versionLabel": {
+    "message": "v$version$",
+    "description": "Версия расширения",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "stateUnconfiguredTitle": {
+    "message": "Туннель не настроен",
+    "description": "Состояние 1: нет настроек"
+  },
+  "stateUnconfiguredBody": {
+    "message": "Введите адрес VPS и креды, затем проверьте соединение.",
+    "description": "Состояние 1: подсказка"
+  },
+  "setupTunnel": {
+    "message": "Настроить",
+    "description": "Кнопка перехода к настройке"
+  },
+  "stateDisabledTitle": {
+    "message": "Туннель выключен",
+    "description": "Состояние 2: настроено, выключено"
+  },
+  "stateDisabledBody": {
+    "message": "Трафик браузера идёт напрямую.",
+    "description": "Состояние 2: подсказка"
+  },
+  "stateCheckingTitle": {
+    "message": "Проверяем соединение…",
+    "description": "Состояние 3: проверка"
+  },
+  "stateCheckingBody": {
+    "message": "Обычно это занимает до 10 секунд.",
+    "description": "Состояние 3: подсказка"
+  },
+  "stateSiteActiveTitle": {
+    "message": "Туннель включён: $site$",
+    "description": "Состояние 4: активный сайт",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "stateSiteActiveBody": {
+    "message": "Через VPS идёт весь профиль Chrome, пока активна вкладка сайта.",
+    "description": "Состояние 4: подсказка"
+  },
+  "stateSiteInactiveTitle": {
+    "message": "Туннель выключен на этом сайте",
+    "description": "Состояние 5: сайт не активен"
+  },
+  "stateSiteInactiveBody": {
+    "message": "Активен только для: $sites$",
+    "description": "Состояние 5: список сайтов",
+    "placeholders": {
+      "sites": {
+        "content": "$1"
+      }
+    }
+  },
+  "enableHere": {
+    "message": "Включить и здесь",
+    "description": "Включить на текущем сайте"
+  },
+  "stateBrowserTitle": {
+    "message": "Туннель включён (весь браузер)",
+    "description": "Состояние 6: весь браузер"
+  },
+  "stateBrowserBody": {
+    "message": "Весь трафик Chrome идёт через VPS.",
+    "description": "Состояние 6: подсказка"
+  },
+  "stateExcludedTitle": {
+    "message": "Этот сайт не проксируется",
+    "description": "Состояние 7: локальный сайт"
+  },
+  "stateExcludedBody": {
+    "message": "Локальная сеть и localhost всегда идут напрямую.",
+    "description": "Состояние 7: подсказка"
+  },
+  "stateUnsupportedTitle": {
+    "message": "На этой странице туннель недоступен",
+    "description": "Служебная страница Chrome"
+  },
+  "stateUnsupportedBody": {
+    "message": "Откройте обычный сайт http:// или https://.",
+    "description": "Служебная страница Chrome: подсказка"
+  },
+  "stateAuthErrorTitle": {
+    "message": "Неверный логин или пароль",
+    "description": "Состояние 8: ошибка авторизации"
+  },
+  "statePolicyErrorTitle": {
+    "message": "Нельзя включить туннель",
+    "description": "Состояние 10: прокси управляется извне"
+  },
+  "currentSite": {
+    "message": "Текущий сайт",
+    "description": "Подпись текущего сайта"
+  },
+  "modeLabel": {
+    "message": "Режим",
+    "description": "Подпись режима"
+  },
+  "modeBrowser": {
+    "message": "Весь браузер",
+    "description": "Режим весь браузер"
+  },
+  "modeSite": {
+    "message": "Только этот сайт",
+    "description": "Режим только этот сайт"
+  },
+  "exitIp": {
+    "message": "Внешний IP",
+    "description": "Exit IP прокси"
+  },
+  "exitIpUnknown": {
+    "message": "не проверялся",
+    "description": "Exit IP отсутствует"
+  },
+  "lastChecked": {
+    "message": "Проверено: $date$",
+    "description": "Время последней проверки",
+    "placeholders": {
+      "date": {
+        "content": "$1"
+      }
+    }
+  },
+  "testNow": {
+    "message": "Проверить",
+    "description": "Проверить сейчас"
+  },
+  "siteModeSoon": {
+    "message": "Только на этом сайте — скоро",
+    "description": "Site-mode появится позже"
+  },
+  "diagnosticsLink": {
+    "message": "Диагностика",
+    "description": "Ссылка на диагностику"
+  },
+  "errorCfgHost": {
+    "message": "Проверьте адрес VPS: hostname, IPv4 или IPv6.",
+    "description": "Ошибка адреса"
+  },
+  "errorCfgPort": {
+    "message": "Порт должен быть целым числом от 1 до 65535.",
+    "description": "Ошибка порта"
+  },
+  "errorCfgCreds": {
+    "message": "Проверьте логин и пароль.",
+    "description": "Ошибка кредов"
+  },
+  "errorProxyUnreachable": {
+    "message": "Не удалось подключиться к прокси. Проверьте адрес, порт и сеть.",
+    "description": "Прокси недоступен"
+  },
+  "errorProxyTls": {
+    "message": "Ошибка TLS сертификата прокси. Сертификат должен быть выдан доверенным центром.",
+    "description": "Ошибка TLS"
+  },
+  "errorAuth407": {
+    "message": "Неверный логин или пароль.",
+    "description": "Ошибка авторизации"
+  },
+  "errorForbidden403": {
+    "message": "Прокси отклонил запрос (403). Возможно, сайт запрещён или исчерпан лимит.",
+    "description": "403 от прокси"
+  },
+  "errorLimit": {
+    "message": "Превышен лимит подключений к прокси.",
+    "description": "Лимит соединений"
+  },
+  "errorPolicy": {
+    "message": "Прокси управляется политикой организации.",
+    "description": "Политика"
+  },
+  "errorOtherExt": {
+    "message": "Прокси управляется другим расширением.",
+    "description": "Другое расширение"
+  },
+  "errorTimeout": {
+    "message": "Превышено время ожидания (10 с).",
+    "description": "Таймаут"
+  },
+  "errorUnsupportedAuth": {
+    "message": "Прокси требует неподдерживаемый тип авторизации.",
+    "description": "Неподдерживаемая авторизация"
+  },
+  "errorNoNetwork": {
+    "message": "Нет подключения к интернету.",
+    "description": "Нет сети"
+  },
+  "errorUnknown": {
+    "message": "Неизвестная ошибка. Откройте диагностику.",
+    "description": "Неизвестная ошибка"
+  },
+  "errorAuthBody": {
+    "message": "Исправьте креды в настройках и повторите проверку.",
+    "description": "Подсказка при ошибке авторизации"
+  },
+  "errorPolicyBody": {
+    "message": "Туннель невозможно включить, пока прокси управляется извне. Обратитесь к администратору.",
+    "description": "Подсказка при внешнем управлении прокси"
+  },
+  "errorTlsBody": {
+    "message": "Проверьте сертификат прокси: он должен быть выпущен доверенным центром и не быть самоподписанным.",
+    "description": "Подсказка при ошибке TLS"
+  },
+  "errorTimeoutBody": {
+    "message": "Прокси не ответил за 10 секунд. Проверьте сеть и повторите.",
+    "description": "Подсказка при таймауте"
+  },
+  "errorConfigBody": {
+    "message": "Проверьте адрес, порт, логин и пароль в настройках.",
+    "description": "Подсказка при ошибке конфигурации"
+  },
+  "errorNetworkBody": {
+    "message": "Проверьте соединение и повторите. Если ошибка повторяется, откройте диагностику.",
+    "description": "Подсказка при сетевой ошибке"
+  },
+  "badgeOn": {
+    "message": "Туннель включён",
+    "description": "Подсказка бейджа ON"
+  },
+  "badgeOff": {
+    "message": "Туннель выключен",
+    "description": "Подсказка пустого бейджа"
+  },
+  "badgeError": {
+    "message": "Ошибка туннеля",
+    "description": "Подсказка бейджа !"
+  },
+  "badgeChecking": {
+    "message": "Проверка соединения",
+    "description": "Подсказка бейджа …"
+  },
+  "menuRoot": {
+    "message": "VPS Tunnel",
+    "description": "Верхний уровень контекстного меню"
+  },
+  "menuEnable": {
+    "message": "Включить туннель (весь браузер)",
+    "description": "Меню: включить"
+  },
+  "menuDisable": {
+    "message": "Выключить туннель",
+    "description": "Меню: выключить"
+  },
+  "menuSiteSoon": {
+    "message": "Только на этом сайте (скоро)",
+    "description": "Меню: site-mode скоро"
+  },
+  "menuSettings": {
+    "message": "Настройки",
+    "description": "Меню: настройки"
+  },
+  "optionsTitle": {
+    "message": "Настройки VPS Tunnel",
+    "description": "Заголовок страницы настроек"
+  },
+  "optionsSubtitle": {
+    "message": "Подключите расширение к своему HTTPS-прокси на VPS.",
+    "description": "Подзаголовок настроек"
+  },
+  "onboardingTitle": {
+    "message": "Настройка за три шага",
+    "description": "Заголовок онбординга"
+  },
+  "onboardingBody": {
+    "message": "Адрес VPS → логин и пароль → проверка и включение. Онбординг можно закрыть в любой момент.",
+    "description": "Описание онбординга"
+  },
+  "stepAddress": {
+    "message": "Адрес VPS",
+    "description": "Шаг 1"
+  },
+  "stepCreds": {
+    "message": "Логин и пароль",
+    "description": "Шаг 2"
+  },
+  "stepFinish": {
+    "message": "Проверка и включение",
+    "description": "Шаг 3"
+  },
+  "stepCounter": {
+    "message": "Шаг $current$ из $total$",
+    "description": "Счётчик шагов",
+    "placeholders": {
+      "current": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "step1Short": {
+    "message": "Адрес",
+    "description": "Короткое имя шага 1"
+  },
+  "step2Short": {
+    "message": "Креды",
+    "description": "Короткое имя шага 2"
+  },
+  "step3Short": {
+    "message": "Проверка",
+    "description": "Короткое имя шага 3"
+  },
+  "schemeLabel": {
+    "message": "Протокол",
+    "description": "Поле протокола"
+  },
+  "schemeHttps": {
+    "message": "HTTPS (рекомендуется)",
+    "description": "HTTPS"
+  },
+  "schemeHttp": {
+    "message": "HTTP (без шифрования)",
+    "description": "HTTP"
+  },
+  "hostLabel": {
+    "message": "Адрес или IP",
+    "description": "Поле host"
+  },
+  "hostHint": {
+    "message": "Домен, IPv4 или IPv6. Без scheme://, слэшей и пробелов.",
+    "description": "Подсказка к host"
+  },
+  "hostPlaceholder": {
+    "message": "proxy.example.com",
+    "description": "Placeholder host"
+  },
+  "portLabel": {
+    "message": "Порт",
+    "description": "Поле порта"
+  },
+  "portHint": {
+    "message": "По умолчанию 443 для HTTPS и 80 для HTTP.",
+    "description": "Подсказка к порту"
+  },
+  "usernameLabel": {
+    "message": "Логин",
+    "description": "Поле логина"
+  },
+  "usernamePlaceholder": {
+    "message": "owner",
+    "description": "Placeholder логина"
+  },
+  "passwordLabel": {
+    "message": "Пароль",
+    "description": "Поле пароля"
+  },
+  "passwordPlaceholderSaved": {
+    "message": "•••••• (сохранён)",
+    "description": "Placeholder сохранённого пароля"
+  },
+  "passwordHintSaved": {
+    "message": "Пароль сохранён. Введите новый, только чтобы заменить его.",
+    "description": "Подсказка к сохранённому паролю"
+  },
+  "passwordHintNew": {
+    "message": "Пароль хранится в chrome.storage.local без шифрования — используйте уникальный пароль.",
+    "description": "Подсказка к новому паролю"
+  },
+  "savedCredentials": {
+    "message": "Креды сохранены",
+    "description": "Креды есть"
+  },
+  "noCredentials": {
+    "message": "Креды не сохранены",
+    "description": "Кредов нет"
+  },
+  "saveOk": {
+    "message": "Настройки сохранены",
+    "description": "Успешное сохранение"
+  },
+  "saveFailed": {
+    "message": "Не удалось сохранить настройки",
+    "description": "Ошибка сохранения"
+  },
+  "errHost": {
+    "message": "Укажите корректный hostname, IPv4 или IPv6.",
+    "description": "Inline-ошибка host"
+  },
+  "errPort": {
+    "message": "Порт — целое число от 1 до 65535.",
+    "description": "Inline-ошибка порта"
+  },
+  "errUsername": {
+    "message": "Логин — от 1 до 64 символов.",
+    "description": "Inline-ошибка логина"
+  },
+  "errPassword": {
+    "message": "Пароль — от 1 до 256 символов.",
+    "description": "Inline-ошибка пароля"
+  },
+  "insecureHttpWarning": {
+    "message": "HTTP не шифрует трафик: логин, пароль и адреса сайтов передаются открыто.",
+    "description": "Предупреждение HTTP"
+  },
+  "trafficWarning": {
+    "message": "При включённом туннеле через VPS идёт весь трафик браузера. В режиме «Только этот сайт» туннель активен, пока активна вкладка сайта из списка — Chrome не умеет проксировать отдельную вкладку.",
+    "description": "Честное предупреждение о режимах"
+  },
+  "storageWarning": {
+    "message": "chrome.storage.local не шифруется. Доступ к профилю ОС = доступ к кредам. Используйте уникальный пароль и меняйте его при подозрении на утечку.",
+    "description": "Модель угроз хранения"
+  },
+  "testTitle": {
+    "message": "Проверка соединения",
+    "description": "Блок проверки"
+  },
+  "testHint": {
+    "message": "Проверим TLS, авторизацию и внешний IP через прокси. Занято до 10 секунд.",
+    "description": "Описание проверки"
+  },
+  "testDirtyHint": {
+    "message": "Сначала сохраните изменения.",
+    "description": "Несохранённые изменения"
+  },
+  "testSuccess": {
+    "message": "Прокси доступен. Внешний IP: $ip$ ($ms$ мс)",
+    "description": "Успешная проверка",
+    "placeholders": {
+      "ip": {
+        "content": "$1"
+      },
+      "ms": {
+        "content": "$2"
+      }
+    }
+  },
+  "testNoProxyWarning": {
+    "message": "Трафик, похоже, не проходит через прокси: внешний IP совпал с прямым.",
+    "description": "Exit IP совпал с прямым"
+  },
+  "testFailed": {
+    "message": "Проверка не удалась",
+    "description": "Ошибка проверки"
+  },
+  "statusTitle": {
+    "message": "Состояние",
+    "description": "Заголовок статуса"
+  },
+  "statusEnabled": {
+    "message": "Туннель включён (весь браузер)",
+    "description": "Статус включён"
+  },
+  "statusDisabled": {
+    "message": "Туннель выключен",
+    "description": "Статус выключен"
+  },
+  "statusChecking": {
+    "message": "Проверяем соединение…",
+    "description": "Статус проверки"
+  },
+  "statusUnconfigured": {
+    "message": "Не настроено",
+    "description": "Статус без настроек"
+  },
+  "endpointLabel": {
+    "message": "Сохранённый адрес",
+    "description": "Сохранённый endpoint"
+  },
+  "enableSuccess": {
+    "message": "Туннель включён",
+    "description": "Туннель включён"
+  },
+  "disableSuccess": {
+    "message": "Туннель выключен",
+    "description": "Туннель выключен"
+  },
+  "credsForgotten": {
+    "message": "Креды удалены, туннель выключен",
+    "description": "Креды забыты"
+  },
+  "credsForgetFailed": {
+    "message": "Не удалось удалить креды",
+    "description": "Ошибка забывания кредов"
+  },
+  "forgetHint": {
+    "message": "Удаляет логин и пароль, выключает туннель. Адрес и порт остаются.",
+    "description": "Подсказка к забыванию кредов"
+  },
+  "diagnosticsTitle": {
+    "message": "Диагностика",
+    "description": "Блок диагностики"
+  },
+  "diagnosticsHint": {
+    "message": "Копирует версию, состояние, ошибку и host/port. Логин и пароль не попадают в отчёт.",
+    "description": "Описание диагностики"
+  },
+  "diagnosticsCopy": {
+    "message": "Скопировать диагностику",
+    "description": "Кнопка копирования диагностики"
+  },
+  "diagnosticsCopied": {
+    "message": "Диагностика скопирована",
+    "description": "Диагностика скопирована"
+  },
+  "diagVersion": {
+    "message": "Версия расширения",
+    "description": "Диагностика: версия"
+  },
+  "diagChrome": {
+    "message": "Браузер",
+    "description": "Диагностика: браузер"
+  },
+  "diagPlatform": {
+    "message": "Платформа",
+    "description": "Диагностика: ОС"
+  },
+  "diagEndpoint": {
+    "message": "Host и порт",
+    "description": "Диагностика: endpoint"
+  },
+  "diagMode": {
+    "message": "Режим",
+    "description": "Диагностика: режим"
+  },
+  "diagState": {
+    "message": "Состояние",
+    "description": "Диагностика: состояние"
+  },
+  "diagEnabled": {
+    "message": "Включён",
+    "description": "Диагностика: включён"
+  },
+  "diagError": {
+    "message": "Последняя ошибка",
+    "description": "Диагностика: ошибка"
+  },
+  "diagLastCheck": {
+    "message": "Последняя проверка",
+    "description": "Диагностика: проверка"
+  },
+  "diagNone": {
+    "message": "нет",
+    "description": "Диагностика: нет значения"
+  },
+  "diagYes": {
+    "message": "да",
+    "description": "Диагностика: да"
+  },
+  "diagNo": {
+    "message": "нет",
+    "description": "Диагностика: нет"
+  },
+  "diagNotChecked": {
+    "message": "не проверялось",
+    "description": "Диагностика: не проверялось"
+  },
+  "diagErrorNone": {
+    "message": "ошибок нет",
+    "description": "Диагностика: ошибок нет"
+  },
+  "siteModeTitle": {
+    "message": "Только этот сайт",
+    "description": "Блок site-mode"
+  },
+  "siteModeSoonBody": {
+    "message": "Режим появится в следующем обновлении. Сейчас доступен основной режим «Весь браузер».",
+    "description": "Site-mode скоро"
+  },
+  "securityTitle": {
+    "message": "Безопасность",
+    "description": "Блок безопасности"
+  },
+  "passwordPlaceholderNew": {
+    "message": "Введите пароль",
+    "description": "Placeholder for a new password"
+  },
+  "stateNetworkErrorTitle": {
+    "message": "Ошибка соединения",
+    "description": "State 9: network/TLS/limit error"
   }
 }

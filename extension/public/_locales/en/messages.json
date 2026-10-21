@@ -10,5 +10,673 @@
   "actionTitle": {
     "message": "VPS Tunnel",
     "description": "Toolbar button title"
+  },
+  "appName": {
+    "message": "VPS Tunnel",
+    "description": "Product name in the UI"
+  },
+  "localeCode": {
+    "message": "en",
+    "description": "UI locale code for Intl"
+  },
+  "settings": {
+    "message": "Settings",
+    "description": "Settings button"
+  },
+  "close": {
+    "message": "Close",
+    "description": "Close dialog"
+  },
+  "cancel": {
+    "message": "Cancel",
+    "description": "Cancel action"
+  },
+  "back": {
+    "message": "Back",
+    "description": "Back to previous step"
+  },
+  "next": {
+    "message": "Next",
+    "description": "Next step"
+  },
+  "retry": {
+    "message": "Retry",
+    "description": "Retry a failed action"
+  },
+  "copy": {
+    "message": "Copy",
+    "description": "Copy text"
+  },
+  "copied": {
+    "message": "Copied",
+    "description": "Copy confirmation"
+  },
+  "soon": {
+    "message": "soon",
+    "description": "Unavailable feature label"
+  },
+  "diagnostics": {
+    "message": "Diagnostics",
+    "description": "Diagnostics link"
+  },
+  "checkConnection": {
+    "message": "Test connection",
+    "description": "Proxy probe"
+  },
+  "testing": {
+    "message": "Testing connection…",
+    "description": "Probe in progress"
+  },
+  "enableTunnel": {
+    "message": "Enable tunnel",
+    "description": "Primary enable button"
+  },
+  "disableTunnel": {
+    "message": "Disable",
+    "description": "Disable button"
+  },
+  "openSettings": {
+    "message": "Open settings",
+    "description": "Go to settings"
+  },
+  "save": {
+    "message": "Save",
+    "description": "Save settings"
+  },
+  "saveAndContinue": {
+    "message": "Save and continue",
+    "description": "Save and go to the test step"
+  },
+  "forgetCreds": {
+    "message": "Forget credentials",
+    "description": "Remove username and password"
+  },
+  "confirmForget": {
+    "message": "Really forget?",
+    "description": "Credential removal confirmation"
+  },
+  "done": {
+    "message": "Done",
+    "description": "Finish"
+  },
+  "versionLabel": {
+    "message": "v$version$",
+    "description": "Extension version",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "stateUnconfiguredTitle": {
+    "message": "Tunnel is not configured",
+    "description": "State 1: no settings"
+  },
+  "stateUnconfiguredBody": {
+    "message": "Enter the VPS address and credentials, then test the connection.",
+    "description": "State 1: hint"
+  },
+  "setupTunnel": {
+    "message": "Set up",
+    "description": "Go to setup button"
+  },
+  "stateDisabledTitle": {
+    "message": "Tunnel is off",
+    "description": "State 2: configured, disabled"
+  },
+  "stateDisabledBody": {
+    "message": "Browser traffic goes directly.",
+    "description": "State 2: hint"
+  },
+  "stateCheckingTitle": {
+    "message": "Testing connection…",
+    "description": "State 3: checking"
+  },
+  "stateCheckingBody": {
+    "message": "This usually takes up to 10 seconds.",
+    "description": "State 3: hint"
+  },
+  "stateSiteActiveTitle": {
+    "message": "Tunnel is on: $site$",
+    "description": "State 4: active site",
+    "placeholders": {
+      "site": {
+        "content": "$1"
+      }
+    }
+  },
+  "stateSiteActiveBody": {
+    "message": "The whole Chrome profile goes through the VPS while the site tab is active.",
+    "description": "State 4: hint"
+  },
+  "stateSiteInactiveTitle": {
+    "message": "Tunnel is off on this site",
+    "description": "State 5: site inactive"
+  },
+  "stateSiteInactiveBody": {
+    "message": "Active only for: $sites$",
+    "description": "State 5: site list",
+    "placeholders": {
+      "sites": {
+        "content": "$1"
+      }
+    }
+  },
+  "enableHere": {
+    "message": "Enable here",
+    "description": "Enable on the current site"
+  },
+  "stateBrowserTitle": {
+    "message": "Tunnel is on (whole browser)",
+    "description": "State 6: whole browser"
+  },
+  "stateBrowserBody": {
+    "message": "All Chrome traffic goes through the VPS.",
+    "description": "State 6: hint"
+  },
+  "stateExcludedTitle": {
+    "message": "This site is not proxied",
+    "description": "State 7: local site"
+  },
+  "stateExcludedBody": {
+    "message": "Local network and localhost always go directly.",
+    "description": "State 7: hint"
+  },
+  "stateUnsupportedTitle": {
+    "message": "Tunnel is unavailable on this page",
+    "description": "Chrome internal page"
+  },
+  "stateUnsupportedBody": {
+    "message": "Open a regular http:// or https:// site.",
+    "description": "Chrome internal page: hint"
+  },
+  "stateAuthErrorTitle": {
+    "message": "Wrong username or password",
+    "description": "State 8: auth error"
+  },
+  "statePolicyErrorTitle": {
+    "message": "Cannot enable the tunnel",
+    "description": "State 10: proxy managed externally"
+  },
+  "currentSite": {
+    "message": "Current site",
+    "description": "Current site label"
+  },
+  "modeLabel": {
+    "message": "Mode",
+    "description": "Mode label"
+  },
+  "modeBrowser": {
+    "message": "Whole browser",
+    "description": "Whole browser mode"
+  },
+  "modeSite": {
+    "message": "This site only",
+    "description": "This site only mode"
+  },
+  "exitIp": {
+    "message": "Exit IP",
+    "description": "Proxy exit IP"
+  },
+  "exitIpUnknown": {
+    "message": "not tested",
+    "description": "No exit IP"
+  },
+  "lastChecked": {
+    "message": "Checked: $date$",
+    "description": "Last check time",
+    "placeholders": {
+      "date": {
+        "content": "$1"
+      }
+    }
+  },
+  "testNow": {
+    "message": "Test",
+    "description": "Test now"
+  },
+  "siteModeSoon": {
+    "message": "This site only — soon",
+    "description": "Site mode comes later"
+  },
+  "diagnosticsLink": {
+    "message": "Diagnostics",
+    "description": "Diagnostics link"
+  },
+  "errorCfgHost": {
+    "message": "Check the VPS address: hostname, IPv4 or IPv6.",
+    "description": "Host error"
+  },
+  "errorCfgPort": {
+    "message": "Port must be an integer from 1 to 65535.",
+    "description": "Port error"
+  },
+  "errorCfgCreds": {
+    "message": "Check the username and password.",
+    "description": "Credential error"
+  },
+  "errorProxyUnreachable": {
+    "message": "Could not connect to the proxy. Check the address, port and network.",
+    "description": "Proxy unreachable"
+  },
+  "errorProxyTls": {
+    "message": "Proxy TLS certificate error. The certificate must be issued by a trusted CA.",
+    "description": "TLS error"
+  },
+  "errorAuth407": {
+    "message": "Wrong username or password.",
+    "description": "Authentication error"
+  },
+  "errorForbidden403": {
+    "message": "The proxy rejected the request (403). The site may be blocked or the limit reached.",
+    "description": "Proxy 403"
+  },
+  "errorLimit": {
+    "message": "Proxy connection limit exceeded.",
+    "description": "Connection limit"
+  },
+  "errorPolicy": {
+    "message": "The proxy is managed by an organization policy.",
+    "description": "Policy"
+  },
+  "errorOtherExt": {
+    "message": "The proxy is managed by another extension.",
+    "description": "Other extension"
+  },
+  "errorTimeout": {
+    "message": "Timed out (10 s).",
+    "description": "Timeout"
+  },
+  "errorUnsupportedAuth": {
+    "message": "The proxy requires an unsupported authentication type.",
+    "description": "Unsupported auth"
+  },
+  "errorNoNetwork": {
+    "message": "No internet connection.",
+    "description": "No network"
+  },
+  "errorUnknown": {
+    "message": "Unknown error. Open diagnostics.",
+    "description": "Unknown error"
+  },
+  "errorAuthBody": {
+    "message": "Fix the credentials in settings and test again.",
+    "description": "Auth error hint"
+  },
+  "errorPolicyBody": {
+    "message": "The tunnel cannot be enabled while the proxy is managed externally. Contact your administrator.",
+    "description": "External proxy management hint"
+  },
+  "errorTlsBody": {
+    "message": "Check the proxy certificate: it must be issued by a trusted CA and must not be self-signed.",
+    "description": "TLS error hint"
+  },
+  "errorTimeoutBody": {
+    "message": "The proxy did not respond within 10 seconds. Check the network and retry.",
+    "description": "Timeout hint"
+  },
+  "errorConfigBody": {
+    "message": "Check the address, port, username and password in settings.",
+    "description": "Configuration error hint"
+  },
+  "errorNetworkBody": {
+    "message": "Check the connection and retry. If it keeps failing, open diagnostics.",
+    "description": "Network error hint"
+  },
+  "badgeOn": {
+    "message": "Tunnel is on",
+    "description": "ON badge tooltip"
+  },
+  "badgeOff": {
+    "message": "Tunnel is off",
+    "description": "Empty badge tooltip"
+  },
+  "badgeError": {
+    "message": "Tunnel error",
+    "description": "! badge tooltip"
+  },
+  "badgeChecking": {
+    "message": "Testing connection",
+    "description": "… badge tooltip"
+  },
+  "menuRoot": {
+    "message": "VPS Tunnel",
+    "description": "Context menu root"
+  },
+  "menuEnable": {
+    "message": "Enable tunnel (whole browser)",
+    "description": "Menu: enable"
+  },
+  "menuDisable": {
+    "message": "Disable tunnel",
+    "description": "Menu: disable"
+  },
+  "menuSiteSoon": {
+    "message": "This site only (soon)",
+    "description": "Menu: site mode soon"
+  },
+  "menuSettings": {
+    "message": "Settings",
+    "description": "Menu: settings"
+  },
+  "optionsTitle": {
+    "message": "VPS Tunnel settings",
+    "description": "Options page heading"
+  },
+  "optionsSubtitle": {
+    "message": "Connect the extension to your HTTPS proxy on a VPS.",
+    "description": "Options page subtitle"
+  },
+  "onboardingTitle": {
+    "message": "Set up in three steps",
+    "description": "Onboarding heading"
+  },
+  "onboardingBody": {
+    "message": "VPS address → username and password → test and enable. You can close onboarding at any time.",
+    "description": "Onboarding description"
+  },
+  "stepAddress": {
+    "message": "VPS address",
+    "description": "Step 1"
+  },
+  "stepCreds": {
+    "message": "Username and password",
+    "description": "Step 2"
+  },
+  "stepFinish": {
+    "message": "Test and enable",
+    "description": "Step 3"
+  },
+  "stepCounter": {
+    "message": "Step $current$ of $total$",
+    "description": "Step counter",
+    "placeholders": {
+      "current": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "step1Short": {
+    "message": "Address",
+    "description": "Step 1 short name"
+  },
+  "step2Short": {
+    "message": "Credentials",
+    "description": "Step 2 short name"
+  },
+  "step3Short": {
+    "message": "Test",
+    "description": "Step 3 short name"
+  },
+  "schemeLabel": {
+    "message": "Protocol",
+    "description": "Protocol field"
+  },
+  "schemeHttps": {
+    "message": "HTTPS (recommended)",
+    "description": "HTTPS"
+  },
+  "schemeHttp": {
+    "message": "HTTP (unencrypted)",
+    "description": "HTTP"
+  },
+  "hostLabel": {
+    "message": "Address or IP",
+    "description": "Host field"
+  },
+  "hostHint": {
+    "message": "Domain, IPv4 or IPv6. No scheme://, slashes or spaces.",
+    "description": "Host hint"
+  },
+  "hostPlaceholder": {
+    "message": "proxy.example.com",
+    "description": "Host placeholder"
+  },
+  "portLabel": {
+    "message": "Port",
+    "description": "Port field"
+  },
+  "portHint": {
+    "message": "Defaults to 443 for HTTPS and 80 for HTTP.",
+    "description": "Port hint"
+  },
+  "usernameLabel": {
+    "message": "Username",
+    "description": "Username field"
+  },
+  "usernamePlaceholder": {
+    "message": "owner",
+    "description": "Username placeholder"
+  },
+  "passwordLabel": {
+    "message": "Password",
+    "description": "Password field"
+  },
+  "passwordPlaceholderSaved": {
+    "message": "•••••• (saved)",
+    "description": "Saved password placeholder"
+  },
+  "passwordHintSaved": {
+    "message": "A password is saved. Enter a new one only to replace it.",
+    "description": "Saved password hint"
+  },
+  "passwordHintNew": {
+    "message": "The password is stored in chrome.storage.local without encryption — use a unique password.",
+    "description": "New password hint"
+  },
+  "savedCredentials": {
+    "message": "Credentials saved",
+    "description": "Credentials present"
+  },
+  "noCredentials": {
+    "message": "No credentials saved",
+    "description": "No credentials"
+  },
+  "saveOk": {
+    "message": "Settings saved",
+    "description": "Saved successfully"
+  },
+  "saveFailed": {
+    "message": "Could not save settings",
+    "description": "Save failed"
+  },
+  "errHost": {
+    "message": "Enter a valid hostname, IPv4 or IPv6.",
+    "description": "Inline host error"
+  },
+  "errPort": {
+    "message": "Port must be an integer from 1 to 65535.",
+    "description": "Inline port error"
+  },
+  "errUsername": {
+    "message": "Username must be 1 to 64 characters.",
+    "description": "Inline username error"
+  },
+  "errPassword": {
+    "message": "Password must be 1 to 256 characters.",
+    "description": "Inline password error"
+  },
+  "insecureHttpWarning": {
+    "message": "HTTP does not encrypt traffic: username, password and site addresses are sent in the clear.",
+    "description": "HTTP warning"
+  },
+  "trafficWarning": {
+    "message": "When the tunnel is on, all browser traffic goes through the VPS. In “This site only” mode the tunnel is active while a site tab from the list is active — Chrome cannot proxy a single tab.",
+    "description": "Honest mode warning"
+  },
+  "storageWarning": {
+    "message": "chrome.storage.local is not encrypted. OS profile access means credential access. Use a unique password and rotate it if exposure is suspected.",
+    "description": "Storage threat model"
+  },
+  "testTitle": {
+    "message": "Connection test",
+    "description": "Test block"
+  },
+  "testHint": {
+    "message": "We check TLS, authorization and the exit IP through the proxy. Takes up to 10 seconds.",
+    "description": "Test description"
+  },
+  "testDirtyHint": {
+    "message": "Save your changes first.",
+    "description": "Unsaved changes"
+  },
+  "testSuccess": {
+    "message": "Proxy is reachable. Exit IP: $ip$ ($ms$ ms)",
+    "description": "Successful test",
+    "placeholders": {
+      "ip": {
+        "content": "$1"
+      },
+      "ms": {
+        "content": "$2"
+      }
+    }
+  },
+  "testNoProxyWarning": {
+    "message": "Traffic does not seem to go through the proxy: the exit IP matches the direct IP.",
+    "description": "Exit IP equals direct IP"
+  },
+  "testFailed": {
+    "message": "Test failed",
+    "description": "Test failed"
+  },
+  "statusTitle": {
+    "message": "Status",
+    "description": "Status heading"
+  },
+  "statusEnabled": {
+    "message": "Tunnel is on (whole browser)",
+    "description": "Enabled status"
+  },
+  "statusDisabled": {
+    "message": "Tunnel is off",
+    "description": "Disabled status"
+  },
+  "statusChecking": {
+    "message": "Testing connection…",
+    "description": "Checking status"
+  },
+  "statusUnconfigured": {
+    "message": "Not configured",
+    "description": "Unconfigured status"
+  },
+  "endpointLabel": {
+    "message": "Saved address",
+    "description": "Saved endpoint"
+  },
+  "enableSuccess": {
+    "message": "Tunnel enabled",
+    "description": "Tunnel enabled"
+  },
+  "disableSuccess": {
+    "message": "Tunnel disabled",
+    "description": "Tunnel disabled"
+  },
+  "credsForgotten": {
+    "message": "Credentials removed, tunnel disabled",
+    "description": "Credentials forgotten"
+  },
+  "credsForgetFailed": {
+    "message": "Could not remove credentials",
+    "description": "Forget credentials failed"
+  },
+  "forgetHint": {
+    "message": "Removes the username and password and disables the tunnel. Address and port stay.",
+    "description": "Forget credentials hint"
+  },
+  "diagnosticsTitle": {
+    "message": "Diagnostics",
+    "description": "Diagnostics block"
+  },
+  "diagnosticsHint": {
+    "message": "Copies the version, state, last error and host/port. Username and password are never included.",
+    "description": "Diagnostics description"
+  },
+  "diagnosticsCopy": {
+    "message": "Copy diagnostics",
+    "description": "Copy diagnostics button"
+  },
+  "diagnosticsCopied": {
+    "message": "Diagnostics copied",
+    "description": "Diagnostics copied"
+  },
+  "diagVersion": {
+    "message": "Extension version",
+    "description": "Diagnostics: version"
+  },
+  "diagChrome": {
+    "message": "Browser",
+    "description": "Diagnostics: browser"
+  },
+  "diagPlatform": {
+    "message": "Platform",
+    "description": "Diagnostics: OS"
+  },
+  "diagEndpoint": {
+    "message": "Host and port",
+    "description": "Diagnostics: endpoint"
+  },
+  "diagMode": {
+    "message": "Mode",
+    "description": "Diagnostics: mode"
+  },
+  "diagState": {
+    "message": "State",
+    "description": "Diagnostics: state"
+  },
+  "diagEnabled": {
+    "message": "Enabled",
+    "description": "Diagnostics: enabled"
+  },
+  "diagError": {
+    "message": "Last error",
+    "description": "Diagnostics: error"
+  },
+  "diagLastCheck": {
+    "message": "Last check",
+    "description": "Diagnostics: last check"
+  },
+  "diagNone": {
+    "message": "none",
+    "description": "Diagnostics: no value"
+  },
+  "diagYes": {
+    "message": "yes",
+    "description": "Diagnostics: yes"
+  },
+  "diagNo": {
+    "message": "no",
+    "description": "Diagnostics: no"
+  },
+  "diagNotChecked": {
+    "message": "not tested",
+    "description": "Diagnostics: not tested"
+  },
+  "diagErrorNone": {
+    "message": "no errors",
+    "description": "Diagnostics: no errors"
+  },
+  "siteModeTitle": {
+    "message": "This site only",
+    "description": "Site mode block"
+  },
+  "siteModeSoonBody": {
+    "message": "This mode arrives in the next update. The default “Whole browser” mode is available now.",
+    "description": "Site mode soon"
+  },
+  "securityTitle": {
+    "message": "Security",
+    "description": "Security block"
+  },
+  "passwordPlaceholderNew": {
+    "message": "Enter password",
+    "description": "Placeholder for a new password"
+  },
+  "stateNetworkErrorTitle": {
+    "message": "Connection error",
+    "description": "State 9: network/TLS/limit error"
   }
 }

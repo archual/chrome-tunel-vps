@@ -3,15 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VPS Tunnel</title>
+    <title></title>
     <script type="module" src="./src/ui/popup/main.ts"></script>
   </head>
   <body>
-    <main class="popup">
-      <h1>VPS Tunnel</h1>
-      <p class="status" id="status">Не настроено</p>
-      <button type="button" id="open-options">Настроить</button>
-      <p class="version" id="version"></p>
+    <main class="popup" id="popup">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3 4.5 6v5.2c0 4.5 3.1 8.2 7.5 9.8 4.4-1.6 7.5-5.3 7.5-9.8V6L12 3Z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </span>
+          <span class="brand-name" data-i18n="appName"></span>
+        </div>
+        <button class="icon-button" id="open-settings" type="button" data-i18n-title="settings" data-i18n-aria-label="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z" />
+          </svg>
+        </button>
+      </header>
+
+      <section class="state-card" id="state-card" data-tone="neutral">
+        <div class="state-icon" id="state-icon" aria-hidden="true">
+          <svg class="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 3 5 6v5.1c0 4.3 2.9 7.8 7 9.4 4.1-1.6 7-5.1 7-9.4V6l-7-3Z" />
+          </svg>
+          <span class="spinner" id="spinner" hidden></span>
+        </div>
+        <div class="state-copy">
+          <h1 id="state-title"></h1>
+          <p id="state-body"></p>
+          <p class="error-code" id="error-code" hidden></p>
+        </div>
+      </section>
+
+      <dl class="facts" id="facts">
+        <div class="fact" id="fact-site">
+          <dt data-i18n="currentSite"></dt>
+          <dd id="site-value">—</dd>
+        </div>
+        <div class="fact" id="fact-mode">
+          <dt data-i18n="modeLabel"></dt>
+          <dd id="mode-value"></dd>
+        </div>
+        <div class="fact" id="fact-ip">
+          <dt data-i18n="exitIp"></dt>
+          <dd id="exit-value"></dd>
+        </div>
+      </dl>
+
+      <div class="actions">
+        <button class="button primary" id="primary-action" type="button"></button>
+        <button class="button secondary" id="site-action" type="button" disabled></button>
+        <div class="link-row">
+          <button class="link-button" id="test-action" type="button" data-i18n="checkConnection"></button>
+          <button class="link-button" id="diagnostics-action" type="button" data-i18n="diagnosticsLink"></button>
+        </div>
+      </div>
+
+      <footer class="app-footer">
+        <span id="version"></span>
+      </footer>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     </main>
   </body>
 </html>

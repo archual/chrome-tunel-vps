@@ -6,6 +6,7 @@ import { AuthRuntime, registerAuthListener } from "./auth";
 import { mapProxyErrorText, RuntimeErrorSignal } from "./error-signal";
 import { ProbeService, STALE_TEST_MARKER_MS, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
 import { createChromeProxySettingsApi, ProxyController } from "./proxy-controller";
+import { registerUiSurface } from "./ui-surface";
 import {
   forgetCredentials,
   hasCredentials,
@@ -51,6 +52,7 @@ const authRuntime = new AuthRuntime({
 });
 
 registerAuthListener(authRuntime);
+registerUiSurface();
 
 chrome.proxy.onProxyError.addListener((details) => {
   const code = mapProxyErrorText(details.error);

@@ -3,14 +3,236 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VPS Tunnel — настройки</title>
+    <title></title>
     <script type="module" src="./src/ui/options/main.ts"></script>
   </head>
   <body>
-    <main class="options">
-      <h1>Настройки VPS Tunnel</h1>
-      <p class="status">Форма настроек появится в следующей задаче (host, port, креды).</p>
-      <p class="version" id="version"></p>
-    </main>
+    <div class="page">
+      <header class="page-header">
+        <div class="brand">
+          <span class="brand-mark large" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 3 4.5 6v5.2c0 4.5 3.1 8.2 7.5 9.8 4.4-1.6 7.5-5.3 7.5-9.8V6L12 3Z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </span>
+          <div>
+            <h1 data-i18n="optionsTitle"></h1>
+            <p class="subtitle" data-i18n="optionsSubtitle"></p>
+          </div>
+        </div>
+        <span class="version-pill" id="header-version"></span>
+      </header>
+
+      <section class="onboarding" id="onboarding">
+        <div>
+          <h2 data-i18n="onboardingTitle"></h2>
+          <p data-i18n="onboardingBody"></p>
+        </div>
+      </section>
+
+      <div class="layout">
+        <aside class="rail">
+          <ol class="stepper" id="stepper">
+            <li>
+              <button class="step-link" type="button" data-step-target="1">
+                <span class="step-number">1</span>
+                <span class="step-label" data-i18n="stepAddress"></span>
+              </button>
+            </li>
+            <li>
+              <button class="step-link" type="button" data-step-target="2">
+                <span class="step-number">2</span>
+                <span class="step-label" data-i18n="stepCreds"></span>
+              </button>
+            </li>
+            <li>
+              <button class="step-link" type="button" data-step-target="3">
+                <span class="step-number">3</span>
+                <span class="step-label" data-i18n="stepFinish"></span>
+              </button>
+            </li>
+          </ol>
+
+          <section class="card side-card">
+            <h2 data-i18n="securityTitle"></h2>
+            <p class="muted" data-i18n="storageWarning"></p>
+            <p class="muted" data-i18n="trafficWarning"></p>
+          </section>
+
+          <section class="card side-card" id="diagnostics">
+            <h2 data-i18n="diagnosticsTitle"></h2>
+            <p class="muted" data-i18n="diagnosticsHint"></p>
+            <dl class="diag-list">
+              <div><dt data-i18n="diagVersion"></dt><dd id="diag-version">—</dd></div>
+              <div><dt data-i18n="diagEndpoint"></dt><dd id="diag-endpoint">—</dd></div>
+              <div><dt data-i18n="diagMode"></dt><dd id="diag-mode">—</dd></div>
+              <div><dt data-i18n="diagState"></dt><dd id="diag-state">—</dd></div>
+              <div><dt data-i18n="diagError"></dt><dd id="diag-error">—</dd></div>
+              <div><dt data-i18n="diagLastCheck"></dt><dd id="diag-last-check">—</dd></div>
+            </dl>
+            <button class="button secondary small" id="copy-diagnostics" type="button" data-i18n="diagnosticsCopy"></button>
+          </section>
+        </aside>
+
+        <main class="steps">
+          <section class="card step" id="step-1" data-step="1">
+            <div class="step-heading">
+              <p class="eyebrow" id="step-1-counter"></p>
+              <h2 data-i18n="stepAddress"></h2>
+              <p class="muted" data-i18n="hostHint"></p>
+            </div>
+
+            <div class="field">
+              <label for="scheme" data-i18n="schemeLabel"></label>
+              <select id="scheme" name="scheme">
+                <option value="https" data-i18n="schemeHttps"></option>
+                <option value="http" data-i18n="schemeHttp"></option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field grow">
+                <label for="host" data-i18n="hostLabel"></label>
+                <input
+                  id="host"
+                  name="host"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  data-i18n-placeholder="hostPlaceholder"
+                />
+                <p class="field-error" id="host-error" hidden></p>
+              </div>
+              <div class="field port">
+                <label for="port" data-i18n="portLabel"></label>
+                <input id="port" name="port" type="text" inputmode="numeric" autocomplete="off" value="443" />
+                <p class="field-error" id="port-error" hidden></p>
+              </div>
+            </div>
+            <p class="hint" data-i18n="portHint"></p>
+
+            <div class="notice warning" id="http-warning" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 9v4M12 17h.01" />
+                <path d="M10.3 3.9 2.6 17.1A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+              </svg>
+              <span data-i18n="insecureHttpWarning"></span>
+            </div>
+
+            <div class="step-actions">
+              <button class="button primary" id="step-1-next" type="button" data-i18n="next"></button>
+            </div>
+          </section>
+
+          <section class="card step" id="step-2" data-step="2" hidden>
+            <div class="step-heading">
+              <p class="eyebrow" id="step-2-counter"></p>
+              <h2 data-i18n="stepCreds"></h2>
+              <p class="muted" id="password-hint" data-i18n="passwordHintNew"></p>
+            </div>
+
+            <div class="field">
+              <label for="username" data-i18n="usernameLabel"></label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                spellcheck="false"
+                data-i18n-placeholder="usernamePlaceholder"
+              />
+              <p class="field-error" id="username-error" hidden></p>
+            </div>
+
+            <div class="field">
+              <label for="password" data-i18n="passwordLabel"></label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                spellcheck="false"
+                data-i18n-placeholder="passwordPlaceholderSaved"
+              />
+              <p class="field-error" id="password-error" hidden></p>
+            </div>
+
+            <div class="credential-state">
+              <span class="dot" id="credential-dot" data-tone="muted" aria-hidden="true"></span>
+              <span id="credential-state-text"></span>
+            </div>
+
+            <div class="step-actions">
+              <button class="button secondary" id="step-2-back" type="button" data-i18n="back"></button>
+              <button class="button primary" id="step-2-save" type="button" data-i18n="saveAndContinue"></button>
+            </div>
+          </section>
+
+          <section class="card step" id="step-3" data-step="3" hidden>
+            <div class="step-heading">
+              <p class="eyebrow" id="step-3-counter"></p>
+              <h2 data-i18n="stepFinish"></h2>
+              <p class="muted" data-i18n="testHint"></p>
+            </div>
+
+            <div class="status-panel" id="status-panel" data-tone="neutral">
+              <div class="status-row">
+                <span class="dot" id="status-dot" data-tone="muted" aria-hidden="true"></span>
+                <div>
+                  <p class="status-title" id="status-title"></p>
+                  <p class="muted" id="status-endpoint"></p>
+                </div>
+              </div>
+              <dl class="summary">
+                <div><dt data-i18n="endpointLabel"></dt><dd id="summary-endpoint">—</dd></div>
+                <div><dt data-i18n="modeLabel"></dt><dd id="summary-mode">—</dd></div>
+                <div><dt data-i18n="exitIp"></dt><dd id="summary-exit">—</dd></div>
+              </dl>
+            </div>
+
+            <div class="test-result" id="test-result" data-tone="neutral" hidden>
+              <p id="test-result-text"></p>
+              <p class="test-warning" id="test-result-warning" hidden></p>
+            </div>
+
+            <div class="notice warning" id="http-warning-step3" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 9v4M12 17h.01" />
+                <path d="M10.3 3.9 2.6 17.1A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+              </svg>
+              <span data-i18n="insecureHttpWarning"></span>
+            </div>
+
+            <div class="step-actions wrap">
+              <button class="button secondary" id="test-connection" type="button" data-i18n="checkConnection"></button>
+              <button class="button primary" id="toggle-tunnel" type="button"></button>
+            </div>
+
+            <div class="site-mode" id="site-mode">
+              <div>
+                <h3 data-i18n="siteModeTitle"></h3>
+                <p class="muted" data-i18n="siteModeSoonBody"></p>
+              </div>
+              <span class="tag" data-i18n="soon"></span>
+            </div>
+
+            <div class="danger-zone">
+              <div>
+                <h3 data-i18n="forgetCreds"></h3>
+                <p class="muted" data-i18n="forgetHint"></p>
+              </div>
+              <button class="button danger small" id="forget-creds" type="button" data-i18n="forgetCreds"></button>
+            </div>
+
+            <div class="step-actions">
+              <button class="button ghost" id="step-3-back" type="button" data-i18n="back"></button>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
   </body>
 </html>
