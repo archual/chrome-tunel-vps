@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "VPS Tunnel",
+  "description": "Маршрутизация трафика Chrome через аутентифицированный VPS-прокси",
+  "version": "0.1.0",
+  "minimum_chrome_version": "120",
+  "default_locale": "ru",
+  "permissions": [
+    "proxy",
+    "storage",
+    "webRequest",
+    "webRequestAuthProvider",
+    "contextMenus"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "VPS Tunnel"
+  },
+  "options_page": "options.html"
+}

@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "VPS Tunnel",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Route Chrome traffic through an authenticated VPS proxy",
+    "description": "Short extension description"
+  },
+  "actionTitle": {
+    "message": "VPS Tunnel",
+    "description": "Toolbar button title"
+  }
+}

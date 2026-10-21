@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "VPS Tunnel",
+    "description": "Название расширения"
+  },
+  "extDescription": {
+    "message": "Маршрутизация трафика Chrome через аутентифицированный VPS-прокси",
+    "description": "Короткое описание расширения"
+  },
+  "actionTitle": {
+    "message": "VPS Tunnel",
+    "description": "Подпись кнопки на панели инструментов"
+  }
+}
