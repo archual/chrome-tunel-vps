@@ -2,11 +2,11 @@
 
 Chrome-расширение Manifest V3 «VPS Tunnel»: маршрутизация трафика браузера через аутентифицированный HTTPS-прокси на собственном VPS. Плюс поставляемая серверная часть (Docker + 3proxy) и документация.
 
-> Статус: T1 Foundations — каркас репозитория, сборка, zip и CI. Функциональность туннеля появляется в следующих задачах.
+> Статус: T1 Foundations — каркас репозитория, сборка и zip. Функциональность туннеля появляется в следующих задачах.
 
 ## Требования
 
-- Node.js 20+ (CI: Node 20)
+- Node.js 20+
 - npm 10+
 - Chrome stable 120+
 
@@ -47,6 +47,6 @@ tests/       Vitest unit-тесты
 - [Runbook VPS](docs/runbook-vps.md)
 - [Безопасность](SECURITY.md)
 
-## CI
+## Проверки
 
-GitHub Actions (`.github/workflows/ci.yml`): `npm ci` → typecheck → lint → test → build → package; zip публикуется как artifact `vps-tunnel-zip`.
+Набор проверок из «Быстрого старта» запускается локально на Node.js 20. GitHub Actions пока не подключён — по решению владельца репозитория CI обходимся без workflow.
