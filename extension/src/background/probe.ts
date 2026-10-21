@@ -30,6 +30,14 @@ export function resolveTestMarker(
   return outcome.recoveryRequired ? current : null;
 }
 
+/**
+ * A stale marker may only be dropped when recovery failed and the subsequent reconcile really
+ * applied a known proxy state. Otherwise the snapshot is the only path back to a safe profile.
+ */
+export function shouldDiscardStaleMarker(recoveryFailed: boolean, applied: boolean): boolean {
+  return recoveryFailed && applied;
+}
+
 const IPV4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 const IPV6 = /^[0-9a-f:]+$/i;
 

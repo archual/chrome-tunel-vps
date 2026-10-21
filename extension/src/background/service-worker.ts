@@ -4,10 +4,10 @@ import { normalizeProxySettings, validateProxyEndpoint } from "../core/proxy-con
 import type { ErrorCode, ProxySettings, PublicState } from "../core/types";
 import { AuthRuntime, registerAuthListener } from "./auth";
 import { mapProxyErrorText, mapRequestErrorText, RuntimeErrorSignal } from "./error-signal";
-import { ProbeService, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
+import { ProbeService, shouldDiscardStaleMarker, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
 import { createChromeProxySettingsApi, ProxyController } from "./proxy-controller";
 import { RuntimeFailureGate } from "./runtime-failures";
-import { publishTestResult } from "./test-result";
+import { publishTestResult, runProbeWithPublication } from "./test-result";
 import { registerUiSurface } from "./ui-surface";
 import {
   forgetCredentials,
@@ -191,35 +191,38 @@ async function testConnection(): Promise<PublicState> {
     await recoverStaleProbe();
   }
 
+  const settings = store.settings;
   const tunnelActive = store.enabled && store.mode === "browser";
   authRuntime.setProbeActive(true);
-  probeGate.beginProbe();
   runtimeSignal.clear();
 
   try {
-    try {
-      await transitionPersistedState("START_TEST");
-      await updateBadge();
-    } catch {
-      void 0;
-    }
+    await runProbeWithPublication(
+      probeGate,
+      async () => {
+        try {
+          await transitionPersistedState("START_TEST");
+          await updateBadge();
+        } catch {
+          void 0;
+        }
 
-    let outcome: ProbeOutcome;
-    try {
-      outcome = await probeService.run(store.settings, { tunnelActive });
-    } catch (error) {
-      outcome = probeOutcomeFromError(error);
-    }
-
-    await publishTestResult(outcome, {
-      updateStore,
-      transition: (event, error) => transitionPersistedState(event, error),
-      updateBadge,
-    });
+        try {
+          return await probeService.run(settings, { tunnelActive });
+        } catch (error) {
+          return probeOutcomeFromError(error);
+        }
+      },
+      (outcome) =>
+        publishTestResult(outcome, {
+          updateStore,
+          transition: (event, error) => transitionPersistedState(event, error),
+          updateBadge,
+        }),
+    );
 
     return await currentPublicState();
   } finally {
-    probeGate.endProbe();
     authRuntime.setProbeActive(false);
     authRuntime.invalidate();
   }
@@ -239,48 +242,64 @@ function isPolicyError(error: unknown): boolean {
   return code === "E_POLICY" || code === "E_OTHER_EXT";
 }
 
-async function clearQuietly(): Promise<void> {
+interface ClearOutcome {
+  applied: boolean;
+  error: unknown;
+}
+
+async function clearQuietly(): Promise<ClearOutcome> {
   try {
     await controller.clear();
-  } catch {
-    void 0;
+    return { applied: true, error: null };
+  } catch (error) {
+    return { applied: false, error };
   }
 }
 
-async function applyStore(): Promise<void> {
+async function applyStore(): Promise<boolean> {
   const { store } = await loadStore();
 
   if (!store.enabled) {
-    await clearQuietly();
+    const clear = await clearQuietly();
+    if (!clear.applied) {
+      await transitionPersistedState("FAIL", clear.error);
+      return false;
+    }
     await transitionPersistedState("CLEAR_OK");
-    return;
+    return true;
   }
 
   if (store.settings === null || !hasCredentials(store)) {
-    await clearQuietly();
+    const clear = await clearQuietly();
     await transitionPersistedState("FAIL", new TunnelError("E_CFG_CREDS"));
-    return;
+    return clear.applied;
   }
 
   if (store.mode !== "browser") {
-    await clearQuietly();
+    const clear = await clearQuietly();
+    if (!clear.applied) {
+      await transitionPersistedState("FAIL", clear.error);
+      return false;
+    }
     await transitionPersistedState("CLEAR_OK");
-    return;
+    return true;
   }
 
   try {
     await controller.apply(store.settings, store.exclusions);
     await transitionPersistedState("APPLY_OK");
+    return true;
   } catch (error) {
     await transitionPersistedState("FAIL", error);
     if (isPolicyError(error)) {
       await updateStore((current) => ({ ...current, enabled: false }));
     }
+    return false;
   }
 }
 
-async function reconcile(): Promise<void> {
-  await applyStore();
+async function reconcile(): Promise<boolean> {
+  return applyStore();
 }
 
 async function bootstrap(): Promise<void> {
@@ -295,8 +314,8 @@ async function bootstrap(): Promise<void> {
   } catch {
     recoveryFailed = true;
   }
-  await reconcile();
-  if (recoveryFailed) {
+  const applied = await reconcile();
+  if (shouldDiscardStaleMarker(recoveryFailed, applied)) {
     try {
       await updateStore((current) => ({ ...current, testInProgress: null }));
     } catch {

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ProbeOutcome } from "../../extension/src/background/probe";
 import { createDefaultStore } from "../../extension/src/background/state";
+import { RuntimeFailureGate } from "../../extension/src/background/runtime-failures";
 import {
   publishTestResult,
+  runProbeWithPublication,
   type TestResultPublisher,
 } from "../../extension/src/background/test-result";
 import { TunnelError } from "../../extension/src/core/errors";
@@ -99,5 +101,61 @@ describe("publishTestResult", () => {
 
     expect(store().testInProgress).toBeNull();
     expect(events).toEqual([{ event: "FAIL", code: "E_TIMEOUT" }]);
+  });
+});
+
+describe("runProbeWithPublication", () => {
+  it("keeps runtime failures suppressed through the whole publication window", async () => {
+    const gate = new RuntimeFailureGate();
+    const applied: string[] = [];
+    let store: VpsTunnelStore = { ...createDefaultStore(), testInProgress: marker };
+
+    const deps: TestResultPublisher = {
+      async updateStore(update) {
+        gate.report(() => applied.push("updateStore"));
+        expect(gate.probeInProgress).toBe(true);
+        store = update(store);
+        return store;
+      },
+      async transition(event) {
+        gate.report(() => applied.push(`transition:${event}`));
+        expect(gate.probeInProgress).toBe(true);
+        return {};
+      },
+      async updateBadge() {
+        gate.report(() => applied.push("updateBadge"));
+        expect(gate.probeInProgress).toBe(true);
+      },
+    };
+
+    await runProbeWithPublication(
+      gate,
+      async () => outcome(),
+      (result) => publishTestResult(result, deps),
+    );
+
+    expect(applied).toEqual([]);
+    expect(store.lastCheck).toMatchObject({ ok: true, exitIp: "203.0.113.10" });
+    expect(store.testInProgress).toBeNull();
+    expect(gate.probeInProgress).toBe(false);
+
+    gate.report(() => applied.push("after-publication"));
+    expect(applied).toEqual(["after-publication"]);
+  });
+
+  it("ends the guard even when publication throws", async () => {
+    const gate = new RuntimeFailureGate();
+
+    await expect(
+      runProbeWithPublication(
+        gate,
+        async () => outcome(),
+        async () => {
+          throw new Error("publish failed");
+        },
+      ),
+    ).rejects.toThrow("publish failed");
+
+    expect(gate.probeInProgress).toBe(false);
   });
 });

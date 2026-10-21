@@ -4,6 +4,7 @@ import {
   probeUrlsForHosts,
   ProbeService,
   resolveTestMarker,
+  shouldDiscardStaleMarker,
   type ProbeMarkerStore,
   type ProbeProxy,
 } from "../../extension/src/background/probe";
@@ -339,5 +340,12 @@ describe("probe URLs and marker recovery", () => {
     expect(resolveTestMarker(marker, { recoveryRequired: false })).toBeNull();
     expect(resolveTestMarker(marker, { recoveryRequired: true })).toBe(marker);
     expect(resolveTestMarker(null, { recoveryRequired: true })).toBeNull();
+  });
+
+  it("discards a stale marker only after a failed recovery was followed by a real apply", () => {
+    expect(shouldDiscardStaleMarker(true, true)).toBe(true);
+    expect(shouldDiscardStaleMarker(true, false)).toBe(false);
+    expect(shouldDiscardStaleMarker(false, true)).toBe(false);
+    expect(shouldDiscardStaleMarker(false, false)).toBe(false);
   });
 });

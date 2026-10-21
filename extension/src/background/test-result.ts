@@ -8,6 +8,29 @@ export interface TestResultPublisher {
   updateBadge(): Promise<void>;
 }
 
+export interface ProbeLifecycle {
+  beginProbe(): void;
+  endProbe(): void;
+}
+
+/**
+ * Runs a probe and publishes its result while runtime-failure suppression stays active.
+ * The guard must outlive publication: a late proxy/auth failure must not overwrite TEST_DONE.
+ */
+export async function runProbeWithPublication(
+  lifecycle: ProbeLifecycle,
+  runProbe: () => Promise<ProbeOutcome>,
+  publish: (outcome: ProbeOutcome) => Promise<void>,
+): Promise<void> {
+  lifecycle.beginProbe();
+  try {
+    const outcome = await runProbe();
+    await publish(outcome);
+  } finally {
+    lifecycle.endProbe();
+  }
+}
+
 export async function publishTestResult(
   outcome: ProbeOutcome,
   deps: TestResultPublisher,
