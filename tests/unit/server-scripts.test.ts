@@ -103,6 +103,21 @@ describe.skipIf(!toolsAvailable)("server user scripts", () => {
     expect(result.stdout).not.toContain("CR:$3$");
   });
 
+  it("matches logins exactly, not as regular expressions", () => {
+    expect(run("add-user.sh", ["--output", "env", "a.b"]).status).toBe(0);
+    expect(run("add-user.sh", ["--output", "env", "axb"]).status).toBe(0);
+    const axbHash = /^axb:(.+)$/m.exec(readPasswd())?.[1];
+
+    const rotated = run("rotate-user.sh", ["--output", "env", "a.b"]);
+    expect(rotated.status, rotated.stderr).toBe(0);
+    expect(readPasswd()).toMatch(new RegExp(`^axb:${(axbHash as string).replace(/[$]/g, "\\$")}$`, "m"));
+
+    expect(run("revoke-user.sh", ["axb"]).status).toBe(0);
+    expect(readPasswd()).toMatch(/^a\.b:CR:\$3\$/m);
+    expect(readPasswd()).not.toMatch(/^axb:/m);
+    expect(run("revoke-user.sh", ["a.b"]).status).toBe(0);
+  });
+
   it("revokes users, removes limits and keeps the users file valid", () => {
     expect(run("revoke-user.sh", ["bob"]).status).toBe(0);
     expect(readFileSync(limitsFile, "utf8")).not.toContain("bob");

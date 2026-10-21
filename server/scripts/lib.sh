@@ -78,7 +78,8 @@ hash_password() {
 
 user_exists() {
   local login="$1"
-  [[ -f "$PASSWD_FILE" ]] && grep -q "^${login}:" "$PASSWD_FILE"
+  [[ -f "$PASSWD_FILE" ]] || return 1
+  awk -F: -v login="$login" '$1 == login { found = 1 } END { exit(found ? 0 : 1) }' "$PASSWD_FILE"
 }
 
 # The proxy container runs as PROXY_UID:PROXY_GID (default 1000:1000) and must
@@ -106,7 +107,7 @@ write_user() {
   ensure_user_file
   tmp="$(mktemp "${PASSWD_FILE}.XXXXXX")"
   if [[ -s "$PASSWD_FILE" ]]; then
-    grep -v "^${login}:" "$PASSWD_FILE" >"$tmp" || true
+    awk -F: -v login="$login" '$1 != login' "$PASSWD_FILE" >"$tmp"
   fi
   printf '%s:%s\n' "$login" "$hash" >>"$tmp"
   chmod 600 "$tmp"
@@ -119,7 +120,7 @@ remove_user_line() {
   local tmp
   ensure_user_file
   tmp="$(mktemp "${PASSWD_FILE}.XXXXXX")"
-  grep -v "^${login}:" "$PASSWD_FILE" >"$tmp" || true
+  awk -F: -v login="$login" '$1 != login' "$PASSWD_FILE" >"$tmp"
   chmod 600 "$tmp"
   fix_ownership "$tmp"
   mv "$tmp" "$PASSWD_FILE"
@@ -142,7 +143,10 @@ set_user_limits() {
   local tmp
   ensure_limits_file
   tmp="$(mktemp "${LIMITS_FILE}.XXXXXX")"
-  grep -v -E "(^|[[:space:]])${login}([[:space:]]|$)" "$LIMITS_FILE" >"$tmp" || true
+  awk -v login="$login" '
+    !( ($1 == "connlim" && $4 == login) ||
+       (($1 == "bandlimin" || $1 == "bandlimout") && $3 == login) )
+  ' "$LIMITS_FILE" >"$tmp"
   if [[ -n "$connlim" ]]; then
     printf 'connlim %s 0 %s * * *\n' "$connlim" "$login" >>"$tmp"
   fi

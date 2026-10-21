@@ -90,9 +90,9 @@ Exit IP совпал с прямым egress-IP стенда; на VPS это б�
 
 ### П. 3 — `auth strong`, per-user ACL, `connlim`, host-only лог
 
-`auth strong` + `users $/etc/3proxy/passwd`; ACL: private/link-local/metadata/CGNAT
-и SMTP 25/465/587 запрещены **до** `allow` для 80/443 и методов
-`HTTP_CONNECT/GET/POST/HEAD/PUT/OTHER`.
+`auth strong` + `users $/etc/3proxy/passwd`; ACL: private/link-local/metadata/CGNAT,
+IPv6 `::1`/`::ffff:0:0/96`/`fc00::/7`/`fe80::/10` и SMTP 25/465/587 запрещены
+**до** `allow` для 80/443 и методов `HTTP_CONNECT/GET/POST/HEAD/PUT/OTHER`.
 
 Per-user лимит (две параллельные CONNECT-сессии разрешены, третья):
 
@@ -161,6 +161,7 @@ MD5-crypt (`$1$`) не используется и не принимается �
 | `connlim` без полного ACL-хвоста трактуется неявно | явный вид: `connlim 100 0 * * * *`, per-user: `connlim N 0 user * * *` |
 | Пустой `passwd` — parse error и контейнер не стартует | `revoke-user.sh` оставляет locked `__disabled__` с случайным потерянным паролем |
 | `ssl_serv` в busybox-сборке проверен | старт с `ssl_serv` и TLS 1.2/1.3 подтверждён |
+| IPv4-only egress и mapped-адреса | `::ffff:0:0/96` в deny; IPv6-цель не создаёт туннель (502), IPv4-ACL не обходится |
 
 ## 5. Как воспроизвести
 
