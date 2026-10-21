@@ -36,6 +36,15 @@ export class RuntimeErrorSignal {
   }
 }
 
+export function isProxyContextError(error: string): boolean {
+  const text = error.toUpperCase();
+  return text.includes("ERR_PROXY_") || text.includes("ERR_TUNNEL_");
+}
+
+export function mapRequestErrorText(error: string): ErrorCode | null {
+  return isProxyContextError(error) ? mapProxyErrorText(error) : null;
+}
+
 export function mapProxyErrorText(error: string): ErrorCode | null {
   const text = error.toUpperCase();
 

@@ -103,24 +103,28 @@ export class AuthRuntime {
       return;
     }
 
-    const decision = evaluateAuthChallenge(
-      {
-        isProxy: details.isProxy,
-        requestId: details.requestId,
-        scheme: details.scheme,
-        challenger:
-          details.challenger === undefined
-            ? null
-            : { host: details.challenger.host, port: details.challenger.port },
-      },
-      {
-        expected: endpointFromStore(store),
-        active: this.isActive(store),
-        tracker: this.tracker,
-      },
-    );
+    try {
+      const decision = evaluateAuthChallenge(
+        {
+          isProxy: details.isProxy,
+          requestId: details.requestId,
+          scheme: details.scheme,
+          challenger:
+            details.challenger === undefined
+              ? null
+              : { host: details.challenger.host, port: details.challenger.port },
+        },
+        {
+          expected: endpointFromStore(store),
+          active: this.isActive(store),
+          tracker: this.tracker,
+        },
+      );
 
-    applyDecision(decision, this.options.report, callback);
+      applyDecision(decision, this.options.report, callback);
+    } catch {
+      callback({});
+    }
   }
 }
 

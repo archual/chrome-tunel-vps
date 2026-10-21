@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mapProxyErrorText, RuntimeErrorSignal } from "../../extension/src/background/error-signal";
+import {
+  mapProxyErrorText,
+  mapRequestErrorText,
+  RuntimeErrorSignal,
+} from "../../extension/src/background/error-signal";
 
 describe("mapProxyErrorText", () => {
   it.each([
@@ -14,6 +18,22 @@ describe("mapProxyErrorText", () => {
     ["net::ERR_FAILED", null],
   ])("maps %s to %s", (error, expected) => {
     expect(mapProxyErrorText(error)).toBe(expected);
+  });
+});
+
+describe("mapRequestErrorText", () => {
+  it.each([
+    ["net::ERR_PROXY_CONNECTION_FAILED", "E_PROXY_UNREACHABLE"],
+    ["net::ERR_TUNNEL_CONNECTION_FAILED", "E_PROXY_UNREACHABLE"],
+    ["net::ERR_PROXY_AUTH_UNSUPPORTED", "E_UNSUPPORTED_AUTH"],
+    ["net::ERR_PROXY_CERTIFICATE_INVALID", "E_PROXY_TLS"],
+    ["net::ERR_TIMED_OUT", null],
+    ["net::ERR_CERT_AUTHORITY_INVALID", null],
+    ["net::ERR_SSL_PROTOCOL_ERROR", null],
+    ["net::ERR_INTERNET_DISCONNECTED", null],
+    ["net::ERR_FAILED", null],
+  ])("does not attribute the origin error %s to the proxy", (error, expected) => {
+    expect(mapRequestErrorText(error)).toBe(expected);
   });
 });
 

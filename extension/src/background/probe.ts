@@ -5,10 +5,30 @@ import type { ProxyControlSnapshot } from "./proxy-controller";
 
 export const PROBE_TIMEOUT_MS = 10_000;
 export const PROBE_BASELINE_TIMEOUT_MS = 3_000;
-export const STALE_TEST_MARKER_MS = 60_000;
 
-const PROXY_IP_URLS = ["https://api.ipify.org?format=json", "https://ifconfig.me/ip"] as const;
-const DIRECT_IP_URL = "https://api.ipify.org?format=json";
+const IFCONFIG_HOST = "ifconfig.me";
+
+function formatUrlHost(host: string): string {
+  const trimmed = host.replace(/\.+$/, "");
+  return trimmed.includes(":") ? `[${trimmed}]` : trimmed;
+}
+
+export function probeUrlsForHosts(hosts: readonly string[]): string[] {
+  return hosts.map((host) => {
+    const normalized = host.replace(/\.+$/, "").toLowerCase();
+    const formatted = formatUrlHost(normalized);
+    const path =
+      normalized === IFCONFIG_HOST || normalized.endsWith(`.${IFCONFIG_HOST}`) ? "/ip" : "?format=json";
+    return `https://${formatted}${path}`;
+  });
+}
+
+export function resolveTestMarker(
+  current: TestInProgress | null,
+  outcome: Pick<ProbeOutcome, "recoveryRequired">,
+): TestInProgress | null {
+  return outcome.recoveryRequired ? current : null;
+}
 
 const IPV4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 const IPV6 = /^[0-9a-f:]+$/i;
@@ -47,6 +67,7 @@ export interface ProbeOutcome {
   directIp: string | null;
   suspectedDirect: boolean;
   errorCode: ErrorCode | null;
+  recoveryRequired: boolean;
 }
 
 interface RequestOutcome {
@@ -117,6 +138,8 @@ export class ProbeService {
   private readonly timeoutMs: number;
   private readonly baselineTimeoutMs: number;
   private readonly probeHosts: readonly string[];
+  private readonly proxyIpUrls: readonly string[];
+  private readonly directIpUrl: string;
   private readonly readSignal: () => ErrorCode | null;
   private readonly clearSignals: () => void;
   private readonly marker: ProbeMarkerStore | undefined;
@@ -128,6 +151,8 @@ export class ProbeService {
     this.timeoutMs = options.timeoutMs ?? PROBE_TIMEOUT_MS;
     this.baselineTimeoutMs = options.baselineTimeoutMs ?? PROBE_BASELINE_TIMEOUT_MS;
     this.probeHosts = options.probeHosts ?? PROBE_HOSTS;
+    this.proxyIpUrls = probeUrlsForHosts(this.probeHosts);
+    this.directIpUrl = this.proxyIpUrls[0] ?? "https://api.ipify.org?format=json";
     this.readSignal = options.readSignal ?? (() => null);
     this.clearSignals = options.clearSignals ?? (() => undefined);
     this.marker = options.marker;
@@ -146,6 +171,7 @@ export class ProbeService {
 
     let snapshot: chrome.proxy.ProxyConfig | null = null;
     let configTouched = false;
+    let recoveryRequired = false;
     let outcome: ProbeOutcome = {
       ok: false,
       exitIp: null,
@@ -153,6 +179,7 @@ export class ProbeService {
       directIp,
       suspectedDirect: false,
       errorCode: null,
+      recoveryRequired: false,
     };
 
     try {
@@ -182,21 +209,26 @@ export class ProbeService {
       outcome = { ...outcome, errorCode: code };
     } finally {
       if (snapshot !== null) {
-        try {
-          if (configTouched) {
+        if (configTouched) {
+          try {
             await this.proxy.restore(snapshot);
+          } catch {
+            recoveryRequired = true;
+            outcome = { ...outcome, ok: false, errorCode: outcome.errorCode ?? "E_UNKNOWN" };
           }
-          if (this.marker !== undefined) {
+        }
+        if (!recoveryRequired && this.marker !== undefined) {
+          try {
             await this.marker.clear();
+          } catch {
+            void 0;
           }
-        } catch {
-          outcome = { ...outcome, ok: false, errorCode: outcome.errorCode ?? "E_UNKNOWN" };
         }
       }
       this.clearSignals();
     }
 
-    return outcome;
+    return { ...outcome, recoveryRequired };
   }
 
   private assertControllable(levelOfControl: ProxyControlSnapshot["levelOfControl"]): void {
@@ -223,12 +255,13 @@ export class ProbeService {
       directIp,
       suspectedDirect: ok && directIp !== null && exitIp === directIp,
       errorCode: ok ? null : (result.errorCode ?? "E_UNKNOWN"),
+      recoveryRequired: false,
     };
   }
 
   private async baselineDirectIp(deadline: number): Promise<string | null> {
     try {
-      const result = await this.request(DIRECT_IP_URL, deadline);
+      const result = await this.request(this.directIpUrl, deadline);
       return result.ip;
     } catch {
       return null;
@@ -239,7 +272,7 @@ export class ProbeService {
     let total = 0;
     let lastError: ErrorCode = "E_UNKNOWN";
 
-    for (const url of PROXY_IP_URLS) {
+    for (const url of this.proxyIpUrls) {
       const remaining = deadline - this.now();
       if (remaining <= 0) {
         return { ip: null, durationMs: total, errorCode: "E_TIMEOUT" };

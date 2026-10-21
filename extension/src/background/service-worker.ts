@@ -3,8 +3,13 @@ import { isCoreRequest, type CoreRequest, type CoreResponse, type SettingsInput 
 import { normalizeProxySettings, validateProxyEndpoint } from "../core/proxy-config";
 import type { ErrorCode, ProxySettings, PublicState } from "../core/types";
 import { AuthRuntime, registerAuthListener } from "./auth";
-import { mapProxyErrorText, RuntimeErrorSignal } from "./error-signal";
-import { ProbeService, STALE_TEST_MARKER_MS, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
+import { mapProxyErrorText, mapRequestErrorText, RuntimeErrorSignal } from "./error-signal";
+import {
+  ProbeService,
+  resolveTestMarker,
+  type ProbeMarkerStore,
+  type ProbeOutcome,
+} from "./probe";
 import { createChromeProxySettingsApi, ProxyController } from "./proxy-controller";
 import { registerUiSurface } from "./ui-surface";
 import {
@@ -71,7 +76,7 @@ chrome.webRequest.onErrorOccurred.addListener(
     if (details.type !== "main_frame") {
       return;
     }
-    const code = mapProxyErrorText(details.error);
+    const code = mapRequestErrorText(details.error);
     if (code === null) {
       return;
     }
@@ -95,6 +100,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 let operationQueue: Promise<unknown> = Promise.resolve();
+let probeInProgress = false;
 
 function enqueue<T>(task: () => Promise<T>): Promise<T> {
   const run = operationQueue.then(task, task);
@@ -141,6 +147,9 @@ async function updateBadge(): Promise<void> {
 
 function reportRuntimeError(code: ErrorCode): void {
   runtimeSignal.set("auth", code);
+  if (probeInProgress) {
+    return;
+  }
   void enqueue(async () => {
     try {
       await transitionPersistedState("FAIL", new TunnelError(code));
@@ -157,15 +166,8 @@ async function recoverStaleProbe(): Promise<void> {
   if (marker === null) {
     return;
   }
-  if (Date.now() - marker.at < STALE_TEST_MARKER_MS) {
-    return;
-  }
 
-  try {
-    await controller.restore(marker.snapshot);
-  } catch {
-    return;
-  }
+  await controller.restore(marker.snapshot);
   await updateStore((current) => ({ ...current, testInProgress: null }));
 }
 
@@ -177,6 +179,7 @@ function probeOutcomeFromError(error: unknown): ProbeOutcome {
     directIp: null,
     suspectedDirect: false,
     errorCode: toTunnelError(error).code,
+    recoveryRequired: false,
   };
 }
 
@@ -186,8 +189,13 @@ async function testConnection(): Promise<PublicState> {
     throw new TunnelError("E_CFG_CREDS");
   }
 
+  if (store.testInProgress !== null) {
+    await recoverStaleProbe();
+  }
+
   const tunnelActive = store.enabled && store.mode === "browser";
   authRuntime.setProbeActive(true);
+  probeInProgress = true;
   runtimeSignal.clear();
 
   try {
@@ -203,13 +211,14 @@ async function testConnection(): Promise<PublicState> {
   } catch (error) {
     outcome = probeOutcomeFromError(error);
   } finally {
+    probeInProgress = false;
     authRuntime.setProbeActive(false);
     authRuntime.invalidate();
   }
 
   await updateStore((current) => ({
     ...current,
-    testInProgress: null,
+    testInProgress: resolveTestMarker(current.testInProgress, outcome),
     lastCheck: {
       at: new Date().toISOString(),
       ok: outcome.ok,

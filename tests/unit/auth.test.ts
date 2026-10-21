@@ -41,6 +41,12 @@ describe("sameAuthEndpoint", () => {
     expect(sameAuthEndpoint({ host: "proxy.k1812.ru", port: Number("443") }, expected)).toBe(true);
     expect(sameAuthEndpoint({ host: "proxy.k1812.ru", port: 444 }, expected)).toBe(false);
   });
+
+  it("rejects a challenger without a host instead of throwing", () => {
+    expect(
+      sameAuthEndpoint({ host: undefined, port: 443 } as unknown as { host: string; port: number }, expected),
+    ).toBe(false);
+  });
 });
 
 describe("evaluateAuthChallenge", () => {

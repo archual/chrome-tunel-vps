@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   parseExitIp,
+  probeUrlsForHosts,
   ProbeService,
+  resolveTestMarker,
   type ProbeMarkerStore,
   type ProbeProxy,
 } from "../../extension/src/background/probe";
@@ -167,6 +169,7 @@ describe("ProbeService", () => {
       directIp: DIRECT_IP,
       suspectedDirect: false,
       errorCode: null,
+      recoveryRequired: false,
     });
     expect(outcome.durationMs).toBeGreaterThanOrEqual(0);
     expect(fetchCalls).toHaveLength(2);
@@ -315,7 +318,26 @@ describe("ProbeService", () => {
 
     expect(outcome.ok).toBe(false);
     expect(outcome.errorCode).toBe("E_UNKNOWN");
+    expect(outcome.recoveryRequired).toBe(true);
     expect(marker.cleared).toBe(0);
     expect(marker.saved).toHaveLength(1);
+  });
+});
+
+describe("probe URLs and marker recovery", () => {
+  it("derives probe URLs from the configured probe hosts", () => {
+    expect(probeUrlsForHosts(["api.ipify.org", "ifconfig.me"])).toEqual([
+      "https://api.ipify.org?format=json",
+      "https://ifconfig.me/ip",
+    ]);
+    expect(probeUrlsForHosts(["2001:db8::1"])).toEqual(["https://[2001:db8::1]?format=json"]);
+  });
+
+  it("clears the marker only when no recovery is required", () => {
+    const marker: TestInProgress = { at: 1, snapshot: { mode: "system" } };
+
+    expect(resolveTestMarker(marker, { recoveryRequired: false })).toBeNull();
+    expect(resolveTestMarker(marker, { recoveryRequired: true })).toBe(marker);
+    expect(resolveTestMarker(null, { recoveryRequired: true })).toBeNull();
   });
 });

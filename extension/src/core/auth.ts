@@ -88,6 +88,9 @@ export function sameAuthEndpoint(
   challenger: { host: string; port: number },
   expected: ExpectedAuthEndpoint,
 ): boolean {
+  if (typeof challenger?.host !== "string" || challenger.host.length === 0) {
+    return false;
+  }
   if (normalizeHost(challenger.host) !== normalizeHost(expected.host)) {
     return false;
   }
