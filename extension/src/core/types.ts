@@ -50,6 +50,9 @@ export interface LastCheck {
   ok: boolean;
   exitIp: string | null;
   errorCode: ErrorCode | null;
+  durationMs: number | null;
+  directIp?: string | null;
+  suspectedDirect?: boolean;
 }
 
 export interface VpsTunnelStore {

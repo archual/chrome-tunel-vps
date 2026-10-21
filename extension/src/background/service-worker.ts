@@ -1,8 +1,11 @@
 import { TunnelError, errorCodeOf, toTunnelError } from "../core/errors";
 import { isCoreRequest, type CoreRequest, type CoreResponse, type SettingsInput } from "../core/messages";
 import { normalizeProxySettings, validateProxyEndpoint } from "../core/proxy-config";
-import type { ProxySettings, PublicState } from "../core/types";
-import { ProxyController } from "./proxy-controller";
+import type { ErrorCode, ProxySettings, PublicState } from "../core/types";
+import { AuthRuntime, registerAuthListener } from "./auth";
+import { mapProxyErrorText, RuntimeErrorSignal } from "./error-signal";
+import { ProbeService, STALE_TEST_MARKER_MS, type ProbeMarkerStore, type ProbeOutcome } from "./probe";
+import { createChromeProxySettingsApi, ProxyController } from "./proxy-controller";
 import {
   forgetCredentials,
   hasCredentials,
@@ -17,7 +20,77 @@ import {
 } from "./state";
 
 const EXTENSION_VERSION = chrome.runtime.getManifest().version;
-const controller = new ProxyController();
+const settingsApi = createChromeProxySettingsApi();
+const controller = new ProxyController({ api: settingsApi });
+const runtimeSignal = new RuntimeErrorSignal();
+
+const markerStore: ProbeMarkerStore = {
+  save: async (marker) => {
+    await updateStore((store) => ({ ...store, testInProgress: marker }));
+  },
+  clear: async () => {
+    await updateStore((store) => ({ ...store, testInProgress: null }));
+  },
+};
+
+const probeService = new ProbeService({
+  proxy: {
+    snapshot: () => settingsApi.get({ incognito: false }),
+    set: (value) => settingsApi.set({ value, scope: "regular" }),
+    restore: (snapshot) => controller.restore(snapshot),
+  },
+  fetchImpl: (input, init) => fetch(input, init),
+  readSignal: () => runtimeSignal.get("auth") ?? runtimeSignal.get("proxy"),
+  clearSignals: () => runtimeSignal.clear(),
+  marker: markerStore,
+});
+
+const authRuntime = new AuthRuntime({
+  loadStore: async () => (await loadStore()).store,
+  report: (code) => reportRuntimeError(code),
+});
+
+registerAuthListener(authRuntime);
+
+chrome.proxy.onProxyError.addListener((details) => {
+  const code = mapProxyErrorText(details.error);
+  if (code === null) {
+    return;
+  }
+  runtimeSignal.set("proxy", code);
+  if (code === "E_AUTH_407" || code === "E_UNSUPPORTED_AUTH") {
+    runtimeSignal.set("auth", code);
+  }
+  reportRuntimeError(code);
+});
+
+chrome.webRequest.onErrorOccurred.addListener(
+  (details) => {
+    if (details.type !== "main_frame") {
+      return;
+    }
+    const code = mapProxyErrorText(details.error);
+    if (code === null) {
+      return;
+    }
+    runtimeSignal.set("proxy", code);
+    void enqueue(async () => {
+      const { store } = await loadStore();
+      if (!store.enabled) {
+        return;
+      }
+      await transitionPersistedState("FAIL", new TunnelError(code));
+      await updateBadge();
+    }).catch(() => undefined);
+  },
+  { urls: ["<all_urls>"] },
+);
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && "vpsTunnel" in changes) {
+    authRuntime.invalidate();
+  }
+});
 
 let operationQueue: Promise<unknown> = Promise.resolve();
 
@@ -39,6 +112,121 @@ async function currentPublicState(
 function errorResponse(error: unknown): CoreResponse {
   const tunnelError = toTunnelError(error);
   return { ok: false, error: { code: tunnelError.code, message: tunnelError.message } };
+}
+
+async function updateBadge(): Promise<void> {
+  try {
+    const state = await currentPublicState();
+    const badge =
+      state.phase === "checking"
+        ? { text: "…", color: [154, 103, 0, 255] as const, key: "badgeChecking" }
+        : state.lastError !== undefined
+          ? { text: "!", color: [207, 34, 46, 255] as const, key: "badgeError" }
+          : state.enabled
+            ? { text: "ON", color: [26, 127, 55, 255] as const, key: "badgeOn" }
+            : { text: "", color: [110, 118, 129, 255] as const, key: "badgeOff" };
+
+    const title = chrome.i18n.getMessage(badge.key);
+    await chrome.action.setBadgeText({ text: badge.text });
+    await chrome.action.setBadgeBackgroundColor({ color: [...badge.color] });
+    if (title.length > 0) {
+      await chrome.action.setTitle({ title });
+    }
+  } catch {
+    void 0;
+  }
+}
+
+function reportRuntimeError(code: ErrorCode): void {
+  runtimeSignal.set("auth", code);
+  void enqueue(async () => {
+    try {
+      await transitionPersistedState("FAIL", new TunnelError(code));
+      await updateBadge();
+    } catch {
+      void 0;
+    }
+  });
+}
+
+async function recoverStaleProbe(): Promise<void> {
+  const { store } = await loadStore();
+  const marker = store.testInProgress;
+  if (marker === null) {
+    return;
+  }
+  if (Date.now() - marker.at < STALE_TEST_MARKER_MS) {
+    return;
+  }
+
+  try {
+    await controller.restore(marker.snapshot);
+  } catch {
+    return;
+  }
+  await updateStore((current) => ({ ...current, testInProgress: null }));
+}
+
+function probeOutcomeFromError(error: unknown): ProbeOutcome {
+  return {
+    ok: false,
+    exitIp: null,
+    durationMs: null,
+    directIp: null,
+    suspectedDirect: false,
+    errorCode: toTunnelError(error).code,
+  };
+}
+
+async function testConnection(): Promise<PublicState> {
+  const { store } = await loadStore();
+  if (store.settings === null || !hasCredentials(store)) {
+    throw new TunnelError("E_CFG_CREDS");
+  }
+
+  const tunnelActive = store.enabled && store.mode === "browser";
+  authRuntime.setProbeActive(true);
+  runtimeSignal.clear();
+
+  try {
+    await transitionPersistedState("START_TEST");
+    await updateBadge();
+  } catch {
+    void 0;
+  }
+
+  let outcome: ProbeOutcome;
+  try {
+    outcome = await probeService.run(store.settings, { tunnelActive });
+  } catch (error) {
+    outcome = probeOutcomeFromError(error);
+  } finally {
+    authRuntime.setProbeActive(false);
+    authRuntime.invalidate();
+  }
+
+  await updateStore((current) => ({
+    ...current,
+    testInProgress: null,
+    lastCheck: {
+      at: new Date().toISOString(),
+      ok: outcome.ok,
+      exitIp: outcome.exitIp,
+      errorCode: outcome.errorCode,
+      durationMs: outcome.durationMs,
+      directIp: outcome.directIp,
+      suspectedDirect: outcome.suspectedDirect,
+    },
+  }));
+
+  if (outcome.ok) {
+    await transitionPersistedState("TEST_DONE");
+  } else {
+    await transitionPersistedState("FAIL", new TunnelError(outcome.errorCode ?? "E_UNKNOWN"));
+  }
+
+  await updateBadge();
+  return currentPublicState();
 }
 
 function validateSettings(settings: ProxySettings): ProxySettings {
@@ -105,19 +293,29 @@ async function bootstrap(): Promise<void> {
   } catch {
     void 0;
   }
+  try {
+    await recoverStaleProbe();
+  } catch {
+    void 0;
+  }
   await reconcile();
+  await updateBadge();
 }
 
 async function setEnabled(enabled: boolean): Promise<PublicState> {
+  authRuntime.invalidate();
+
   if (!enabled) {
     await updateStore((store) => ({ ...store, enabled: false }));
     try {
       await controller.clear();
       await transitionPersistedState("CLEAR_OK");
+      authRuntime.resetAttempts();
     } catch (error) {
       await transitionPersistedState("FAIL", error);
       throw error;
     }
+    await updateBadge();
     return currentPublicState();
   }
 
@@ -128,7 +326,9 @@ async function setEnabled(enabled: boolean): Promise<PublicState> {
   validateSettings(store.settings);
 
   await updateStore((current) => ({ ...current, enabled: true }));
+  authRuntime.resetAttempts();
   await applyStore();
+  await updateBadge();
 
   const state = await loadPersistedState();
   if (state.phase === "error") {
@@ -140,9 +340,11 @@ async function setEnabled(enabled: boolean): Promise<PublicState> {
 
 async function setMode(mode: PublicState["mode"]): Promise<PublicState> {
   const updated = await updateStore((current) => ({ ...current, mode }));
+  authRuntime.invalidate();
   if (updated.enabled) {
     await applyStore();
   }
+  await updateBadge();
   return currentPublicState();
 }
 
@@ -162,11 +364,15 @@ async function saveSettings(input: SettingsInput): Promise<PublicState> {
   });
 
   await updateStore((current) => ({ ...current, settings: normalized }));
+  authRuntime.invalidate();
+  authRuntime.resetAttempts();
   return currentPublicState();
 }
 
 async function forgetCreds(): Promise<PublicState> {
   await forgetCredentials();
+  authRuntime.invalidate();
+  authRuntime.resetAttempts();
   try {
     await controller.clear();
     await transitionPersistedState("CLEAR_OK");
@@ -178,6 +384,7 @@ async function forgetCreds(): Promise<PublicState> {
       throw error;
     }
   }
+  await updateBadge();
   return currentPublicState();
 }
 
@@ -189,6 +396,8 @@ async function handleRequest(request: CoreRequest): Promise<CoreResponse> {
       return { ok: true, state: await saveSettings(request.settings) };
     case "FORGET_CREDS":
       return { ok: true, state: await forgetCreds() };
+    case "TEST_CONNECTION":
+      return { ok: true, state: await testConnection() };
     case "SET_ENABLED":
       return { ok: true, state: await setEnabled(request.enabled) };
     case "SET_MODE":
@@ -213,6 +422,8 @@ void enqueue(async () => {
   try {
     await restrictToTrustedContexts();
     await loadPersistedState();
+    await recoverStaleProbe();
+    await updateBadge();
   } catch {
     void 0;
   }

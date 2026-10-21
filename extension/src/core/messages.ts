@@ -12,6 +12,7 @@ export type CoreRequest =
   | { type: "GET_STATE" }
   | { type: "SAVE_SETTINGS"; settings: SettingsInput }
   | { type: "FORGET_CREDS" }
+  | { type: "TEST_CONNECTION" }
   | { type: "SET_ENABLED"; enabled: boolean; site?: string }
   | { type: "SET_MODE"; mode: TunnelMode };
 
@@ -23,6 +24,7 @@ const CORE_REQUEST_TYPES = new Set([
   "GET_STATE",
   "SAVE_SETTINGS",
   "FORGET_CREDS",
+  "TEST_CONNECTION",
   "SET_ENABLED",
   "SET_MODE",
 ]);

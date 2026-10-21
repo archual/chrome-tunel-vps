@@ -224,7 +224,7 @@ describe("storage security helpers", () => {
       enabled: true,
       sites: [{ host: "example.com", addedAt: "2026-10-21T00:00:00.000Z" }],
       testInProgress: { at: 1, snapshot: { mode: "system" } },
-      lastCheck: { at: "2026-10-21T00:00:00.000Z", ok: true, exitIp: "203.0.113.10", errorCode: null },
+      lastCheck: { at: "2026-10-21T00:00:00.000Z", ok: true, exitIp: "203.0.113.10", errorCode: null, durationMs: 120 },
     };
     const { area, data } = createLocalArea({ [STORAGE_KEY]: store });
 

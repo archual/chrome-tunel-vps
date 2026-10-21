@@ -168,12 +168,17 @@ function normalizeLastCheck(value: unknown): LastCheck | null {
 
   const exitIp = asString(value.exitIp) ?? asString(value.ip) ?? null;
   const errorCode = isErrorCode(value.errorCode) ? value.errorCode : isErrorCode(value.code) ? value.code : null;
+  const durationValue = asNumber(value.durationMs);
+  const directIp = asString(value.directIp) ?? null;
 
   return {
     at,
     ok: value.ok === true,
     exitIp,
     errorCode,
+    durationMs: durationValue === null ? null : Math.max(0, Math.round(durationValue)),
+    ...(directIp === null ? {} : { directIp }),
+    ...(value.suspectedDirect === true ? { suspectedDirect: true } : {}),
   };
 }
 
@@ -454,7 +459,13 @@ export function reduceState(
     };
   }
 
-  if (event === "APPLY_OK" || event === "CLEAR_OK" || event === "RESET" || event === "START_TEST") {
+  if (
+    event === "APPLY_OK" ||
+    event === "CLEAR_OK" ||
+    event === "RESET" ||
+    event === "START_TEST" ||
+    event === "TEST_DONE"
+  ) {
     return { phase, lastError: null };
   }
 
