@@ -91,11 +91,24 @@ fix_ownership() {
   fi
 }
 
+# Directories under server/ are bind-mounted into the proxy container, which
+# runs as PROXY_UID:PROXY_GID. When the scripts run as root the directory must
+# be handed over too, otherwise uid 1000 cannot traverse it even if the files
+# inside are readable.
+fix_dir_ownership() {
+  local dir="$1"
+  if [[ "$(id -u)" -eq 0 ]]; then
+    chown "$PROXY_UID:$PROXY_GID" "$dir"
+    chmod 750 "$dir"
+  fi
+}
+
 ensure_user_file() {
   if [[ ! -f "$PASSWD_FILE" ]]; then
     mkdir -p "$(dirname -- "$PASSWD_FILE")"
     install -m 600 /dev/null "$PASSWD_FILE"
   fi
+  fix_dir_ownership "$(dirname -- "$PASSWD_FILE")"
   chmod 600 "$PASSWD_FILE"
   fix_ownership "$PASSWD_FILE"
 }
@@ -135,6 +148,7 @@ ensure_limits_file() {
       '#         bandlimin/bandlimout <bps> <user> <source> <target> <ports>' \
       >"$LIMITS_FILE"
   fi
+  fix_dir_ownership "$(dirname -- "$LIMITS_FILE")"
 }
 
 # set_user_limits <login> [connlim] [bandwidth] — an empty value removes that limit.

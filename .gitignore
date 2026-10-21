@@ -13,6 +13,7 @@ server/certs/*
 *.key
 *.crt
 server/etc/passwd
+server/etc/passwd.*
 
 logs/
 *.log
@@ -22,6 +23,7 @@ logs/
 
 # Server runtime state (scripts/init.sh creates these)
 server/etc/user-limits.cfg
+server/etc/user-limits.cfg.*
 server/logs/
 __pycache__/
 *.pyc

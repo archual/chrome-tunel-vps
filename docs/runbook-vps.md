@@ -132,7 +132,7 @@ curl -sS --max-time 8 --proxy https://proxy.k1812.ru:443 \
 
 ```bash
 docker compose logs --tail=100 proxy
-tail -n 50 logs/3proxy.log.$(date +%F)
+tail -n 50 logs/3proxy.log.$(date +%Y.%m.%d)
 ```
 
 Формат:

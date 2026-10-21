@@ -17,6 +17,7 @@ proxy_url="https://${PROXY_DOMAIN}:${PROXY_PORT}"
 
 curl_args=(
   --silent --show-error --max-time 10
+  --noproxy ''
   --proxy "$proxy_url"
   --resolve "${PROXY_DOMAIN}:${PROXY_PORT}:${host}"
   --output /dev/null

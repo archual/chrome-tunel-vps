@@ -12,9 +12,11 @@ source "$SCRIPT_DIR/lib.sh"
 umask 027
 
 install -d -m 700 "$SERVER_DIR/logs" "$SERVER_DIR/certs" "$SERVER_DIR/etc"
-if [[ "$(id -u)" -eq 0 ]]; then
-  chown "$PROXY_UID:$PROXY_GID" "$SERVER_DIR/logs"
-fi
+# The container runs as PROXY_UID:PROXY_GID and bind-mounts these directories;
+# hand over each one so uid 1000 can traverse it when this runs as root.
+fix_dir_ownership "$SERVER_DIR/logs"
+fix_dir_ownership "$SERVER_DIR/certs"
+fix_dir_ownership "$SERVER_DIR/etc"
 
 if [[ ! -f "$SERVER_DIR/etc/passwd" ]]; then
   install -m 600 /dev/null "$SERVER_DIR/etc/passwd"

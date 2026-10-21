@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -48,6 +48,33 @@ afterAll(() => {
 });
 
 describe.skipIf(!toolsAvailable)("server user scripts", () => {
+  it("hands the shared etc directory to the proxy uid when run as root", () => {
+    const fakeBin = join(workDir, "fake-bin");
+    const target = join(workDir, "root-owned-etc");
+    const chownLog = join(workDir, "chown.log");
+    mkdirSync(fakeBin, { recursive: true });
+    mkdirSync(target);
+
+    writeFileSync(join(fakeBin, "id"), '#!/bin/sh\necho 0\n');
+    writeFileSync(join(fakeBin, "chown"), `#!/bin/sh\nprintf '%s\\n' "$*" >> '${chownLog}'\n`);
+    chmodSync(join(fakeBin, "id"), 0o755);
+    chmodSync(join(fakeBin, "chown"), 0o755);
+
+    const lib = resolve(repoRoot, "server/scripts/lib.sh");
+    const result = spawnSync(
+      "bash",
+      ["-c", `source '${lib}' && fix_dir_ownership '${target}'`],
+      {
+        cwd: repoRoot,
+        env: { ...env, PATH: `${fakeBin}:${process.env.PATH ?? ""}` },
+        encoding: "utf8",
+      },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(readFileSync(chownLog, "utf8").trim()).toBe(`1000:1000 ${target}`);
+    expect(statSync(target).mode & 0o777).toBe(0o750);
+  });
+
   it("adds a user with a 128-bit password and a CR:$3$ hash only", () => {
     const result = run("add-user.sh", ["--output", "env", "alice"]);
     expect(result.status, result.stderr).toBe(0);
@@ -116,6 +143,19 @@ describe.skipIf(!toolsAvailable)("server user scripts", () => {
     expect(readPasswd()).toMatch(/^a\.b:CR:\$3\$/m);
     expect(readPasswd()).not.toMatch(/^axb:/m);
     expect(run("revoke-user.sh", ["a.b"]).status).toBe(0);
+  });
+
+  it("removes limits for the exact login only", () => {
+    expect(run("add-user.sh", ["--output", "env", "--connlim", "3", "a.b"]).status).toBe(0);
+    expect(run("add-user.sh", ["--output", "env", "--connlim", "5", "axb"]).status).toBe(0);
+
+    expect(run("revoke-user.sh", ["a.b"]).status).toBe(0);
+    const limits = readFileSync(limitsFile, "utf8");
+    expect(limits).toContain("connlim 5 0 axb * * *");
+    expect(limits).not.toContain("connlim 3 0 a.b * * *");
+
+    expect(run("revoke-user.sh", ["axb"]).status).toBe(0);
+    expect(readFileSync(limitsFile, "utf8")).not.toContain("axb");
   });
 
   it("revokes users, removes limits and keeps the users file valid", () => {
