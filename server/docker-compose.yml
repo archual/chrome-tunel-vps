@@ -1,0 +1,31 @@
+services:
+  proxy:
+    # 3proxy 0.9.9.1 LTS (multi-arch index). Pinned by digest on purpose:
+    # never use :latest. Re-pin only together with an ADR update and a spike rerun.
+    image: 3proxy/3proxy:lts-busybox@sha256:a7058c40fe315777cc44daeea2da7dba16a85eb857ccb1852cd329514ce4c74a
+    container_name: vps-tunnel-proxy
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/opt/vps-tunnel/entrypoint.sh"]
+    command: ["/bin/3proxy", "/etc/3proxy/3proxy.cfg"]
+    # Only the TLS port is published. 3129 stays inside the container network.
+    ports:
+      - "${PUBLIC_PORT:-443}:3129/tcp"
+    environment:
+      PROXY_DOMAIN: ${PROXY_DOMAIN:-proxy.k1812.ru}
+      PROXY_PUBLIC_IP: ${PROXY_PUBLIC_IP:-}
+      DENY_EXTRA_CIDRS: ${DENY_EXTRA_CIDRS:-}
+    volumes:
+      - ./etc:/etc/3proxy:ro
+      - ./certs:/etc/3proxy/certs:ro
+      - ./logs:/var/log/3proxy
+      - ./scripts/entrypoint.sh:/opt/vps-tunnel/entrypoint.sh:ro
+      - ./scripts/healthcheck-container.sh:/opt/vps-tunnel/healthcheck-container.sh:ro
+    user: "${PROXY_UID:-1000}:${PROXY_GID:-1000}"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "/bin/sh", "/opt/vps-tunnel/healthcheck-container.sh"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 10s

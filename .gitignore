@@ -19,3 +19,9 @@ logs/
 .DS_Store
 .idea/
 .vscode/
+
+# Server runtime state (scripts/init.sh creates these)
+server/etc/user-limits.cfg
+server/logs/
+__pycache__/
+*.pyc
