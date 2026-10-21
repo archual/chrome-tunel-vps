@@ -212,3 +212,35 @@ SMOKE_USER=alice SMOKE_PASSWORD='<password>' PROXY_PUBLIC_IP=203.0.113.10 \
 | SRV-AC-8 | `add-user.sh --connlim 2`, 3-й одновременный CONNECT → 503, сервис жив |
 | SRV-AC-9 | `healthcheck.sh` → ok; `docker compose stop proxy` → ошибка |
 | SRV-AC-10 | smoke: `git grep` + `git check-ignore` для `.env`, `etc/passwd`, `certs/*` |
+
+## 10. Demo T10: `demo-proxy.k1812.ru:8443` (ARC-608)
+
+Статус: владелец письменно одобрил fallback `:8443` (2026-10-21). `:443` занят edge-nginx
+(`CONNECT` → `400`), поэтому demo-прокси публикуется на `8443`. Деплой выполняется только
+после PASS T9 (ARC-607).
+
+- A-запись: `demo-proxy.k1812.ru` → `31.59.37.159` (проверено).
+- Endpoint: `https://demo-proxy.k1812.ru:8443` — TLS explicit proxy (`CONNECT`).
+- Переменные: `PROXY_DOMAIN=demo-proxy.k1812.ru`, `PUBLIC_PORT=8443`; `3129` остаётся
+  внутри контейнера и снаружи закрыт.
+- TLS ≥1.2, валидный сертификат для `demo-proxy.k1812.ru` (wildcard `*.k1812.ru` покрывает
+  имя; цепочку проверить `openssl s_client`). Автопродление — как в §2.
+- Firewall: `8443/tcp` открыт, `3129/tcp` закрыт, `80/tcp` — только ACME.
+- Demo-пользователь создаётся `add-user.sh` (пароль ≥128 бит), креды — только в секрете
+  Paperclip. Не писать пароль в issue, чат, документы или файлы.
+- Перед запуском убедиться, что временный QA-прокси из ARC-641 на `:8443` остановлен,
+  иначе будет конфликт порта.
+
+Проверка после деплоя:
+
+```bash
+curl -sS --proxy-cacert /etc/ssl/certs/ca-certificates.crt \
+  -x https://<demo-user>:<secret>@demo-proxy.k1812.ru:8443 https://api.ipify.org
+# ожидается 31.59.37.159
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  --proxy https://demo-proxy.k1812.ru:8443 https://example.com/
+# 407
+```
+
+Откат: `docker compose down` для demo-инстанса, `revoke-user.sh <demo-user>`, закрыть
+`8443/tcp` в firewall. Demo живёт до 31.10.2026, затем выключается.
